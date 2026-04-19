@@ -1,10 +1,10 @@
 project_id = "zcryggrrjhrtsfgugebi"
 
 [functions.seed-demo]
-verify_jwt = true
+verify_jwt = false
 
 [functions.student-assistant]
-verify_jwt = true
+verify_jwt = false
 
 [functions.document-agent]
-verify_jwt = true
+verify_jwt = false
