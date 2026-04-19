@@ -6,6 +6,16 @@ import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { Squiggle, StarSpark, ScribbleArrow } from "@/components/Doodles";
 import { Link } from "react-router-dom";
 import { Calendar, GraduationCap, Sparkles, FileText, ArrowUpRight, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+
+const containerVars = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+const itemVars = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 12 } }
+};
 
 const Dashboard = () => {
   const { user, profileId } = useAuth();
@@ -63,9 +73,14 @@ const Dashboard = () => {
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="animate-spin" /></div>;
 
   return (
-    <div className="space-y-8">
+    <motion.div 
+      className="space-y-8"
+      variants={containerVars}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-4">
+      <motion.div variants={itemVars} className="flex items-start justify-between flex-wrap gap-4">
         <div>
           <div className="text-sm text-muted-foreground mb-2">{new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</div>
           <h1 className="font-display text-4xl md:text-5xl">
@@ -78,10 +93,10 @@ const Dashboard = () => {
             {seeded ? "Données chargées ✓" : "Charger des données démo"}
           </button>
         )}
-      </div>
+      </motion.div>
 
       {/* Hero stats */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <motion.div variants={itemVars} className="grid lg:grid-cols-3 gap-6">
         <div className="retro-card p-8 lg:col-span-2 relative grain">
           <div className="flex items-start justify-between mb-4">
             <div className="retro-tag">Moyenne générale</div>
@@ -106,10 +121,10 @@ const Dashboard = () => {
             Discuter <ArrowUpRight size={16} />
           </div>
         </Link>
-      </div>
+      </motion.div>
 
       {/* Quick links */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div variants={itemVars} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { to: "/notes", icon: GraduationCap, label: "Mes notes", sub: "Voir le détail" },
           { to: "/emploi-du-temps", icon: Calendar, label: "Emploi du temps", sub: "Cette semaine" },
@@ -122,10 +137,10 @@ const Dashboard = () => {
             <div className="text-xs text-muted-foreground">{l.sub}</div>
           </Link>
         ))}
-      </div>
+      </motion.div>
 
       {/* Today */}
-      <div className="retro-card p-6">
+      <motion.div variants={itemVars} className="retro-card p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-2xl">Aujourd'hui</h2>
           <Link to="/emploi-du-temps" className="text-sm font-semibold underline underline-offset-4">Voir la semaine</Link>
@@ -145,8 +160,8 @@ const Dashboard = () => {
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

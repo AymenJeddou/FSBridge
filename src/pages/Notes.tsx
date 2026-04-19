@@ -6,6 +6,16 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { Loader2, TrendingUp } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import { motion, AnimatePresence } from "framer-motion";
+
+const containerVars = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+};
+const itemVars = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
+};
 
 const Notes = () => {
   const { profileId } = useAuth();
@@ -60,15 +70,20 @@ const Notes = () => {
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="animate-spin" /></div>;
 
   return (
-    <div className="space-y-8">
-      <div>
+    <motion.div 
+      className="space-y-8"
+      variants={containerVars}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={itemVars}>
         <div className="retro-tag mb-3">Mes notes</div>
         <h1 className="font-display text-4xl md:text-5xl">Bulletin & évolution</h1>
         <p className="text-muted-foreground mt-2">Détail par matière, par semestre, et courbes d'évolution.</p>
-      </div>
+      </motion.div>
 
       {/* Top stats */}
-      <div className="grid md:grid-cols-3 gap-4">
+      <motion.div variants={itemVars} className="grid md:grid-cols-3 gap-4">
         <div className="retro-card p-6">
           <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Moyenne générale</div>
           <div className="font-display text-5xl">{fmt(moyG)}<span className="text-xl text-muted-foreground">/20</span></div>
@@ -84,11 +99,11 @@ const Notes = () => {
           <div className="font-display text-5xl">{grades.length}</div>
           <div className="text-xs text-muted-foreground mt-2">Notes saisies</div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Global evolution */}
       {evolution.length > 1 && (
-        <div className="retro-card p-6">
+        <motion.div variants={itemVars} className="retro-card p-6">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp size={18} />
             <h2 className="font-display text-2xl">Évolution globale</h2>
@@ -104,12 +119,12 @@ const Notes = () => {
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Per-subject bar chart */}
       {bySubj.length > 0 && (
-        <div className="retro-card p-6">
+        <motion.div variants={itemVars} className="retro-card p-6">
           <h2 className="font-display text-2xl mb-4">Moyennes par matière</h2>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -122,12 +137,12 @@ const Notes = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* By semester */}
       {Object.entries(bySemestre).sort().map(([sem, subs]: any) => (
-        <div key={sem} className="space-y-3">
+        <motion.div key={sem} variants={itemVars} className="space-y-3">
           <h2 className="font-display text-2xl flex items-center gap-3">
             Semestre {sem.replace("S", "")}
             <span className="text-sm text-muted-foreground font-sans font-normal">
@@ -144,8 +159,14 @@ const Notes = () => {
                   </div>
                   <div className="font-display text-2xl shrink-0">{fmt(s.moyenne)}<span className="text-sm text-muted-foreground">/20</span></div>
                 </button>
+                <AnimatePresence>
                 {openSubj === s.id && (
-                  <div className="border-t-2 border-foreground p-5 bg-secondary/40 space-y-2 animate-fade-in">
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="border-t-2 border-foreground p-5 bg-secondary/40 space-y-2 overflow-hidden"
+                  >
                     {s.notes.map((n: any) => (
                       <div key={n.id} className="flex items-center justify-between text-sm">
                         <div>
@@ -156,12 +177,13 @@ const Notes = () => {
                         <div className="font-mono font-semibold">{Number(n.note).toFixed(2)}/20</div>
                       </div>
                     ))}
-                  </div>
+                  </motion.div>
                 )}
+                </AnimatePresence>
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
       ))}
 
       {bySubj.length === 0 && (
@@ -170,7 +192,7 @@ const Notes = () => {
           <div className="text-sm">Charge les données démo depuis le tableau de bord.</div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

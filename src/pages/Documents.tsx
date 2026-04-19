@@ -5,6 +5,16 @@ import { useToast } from "@/hooks/use-toast";
 import { Download, FileText, Loader2, Sparkles, Plus, X } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import { motion, AnimatePresence } from "framer-motion";
+
+const containerVars = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+const itemVars = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
+};
 
 const TYPES: { id: any; label: string; desc: string }[] = [
   { id: "attestation_inscription", label: "Attestation d'inscription", desc: "Prouve que vous êtes inscrit pour l'année universitaire en cours." },
@@ -64,8 +74,13 @@ const Documents = () => {
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="animate-spin" /></div>;
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-end justify-between flex-wrap gap-4">
+    <motion.div 
+      className="space-y-8"
+      variants={containerVars}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={itemVars} className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <div className="retro-tag mb-3">Documents officiels</div>
           <h1 className="font-display text-4xl md:text-5xl">Mes demandes</h1>
@@ -74,16 +89,16 @@ const Documents = () => {
         <button onClick={() => setOpen(true)} className="bg-foreground text-background px-5 py-3 rounded-full font-semibold flex items-center gap-2">
           <Plus size={16} /> Nouvelle demande
         </button>
-      </div>
+      </motion.div>
 
       {/* Requests */}
       {requests.length === 0 ? (
-        <div className="retro-card p-12 text-center">
+        <motion.div variants={itemVars} className="retro-card p-12 text-center">
           <FileText size={32} className="mx-auto mb-3 text-muted-foreground" />
           <div className="text-muted-foreground">Aucune demande pour l'instant.</div>
-        </div>
+        </motion.div>
       ) : (
-        <div className="space-y-3">
+        <motion.div variants={itemVars} className="space-y-3">
           {requests.map((r) => {
             const t = TYPES.find((x) => x.id === r.type);
             return (
@@ -113,10 +128,11 @@ const Documents = () => {
               </div>
             );
           })}
-        </div>
+        </motion.div>
       )}
 
       {/* Modal */}
+      <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-foreground/30 animate-fade-in" onClick={() => setOpen(false)}>
           <div className="retro-card bg-card max-w-lg w-full p-6 space-y-5 animate-scale-in" onClick={(e) => e.stopPropagation()}>
@@ -147,7 +163,8 @@ const Documents = () => {
           </div>
         </div>
       )}
-    </div>
+      </AnimatePresence>
+    </motion.div>
   );
 };
 

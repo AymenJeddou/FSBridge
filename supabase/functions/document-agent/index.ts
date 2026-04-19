@@ -6,6 +6,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+
 const DOC_LABELS: Record<string, string> = {
   attestation_inscription: "Attestation d'inscription",
   releve_notes: "Relevé de notes",
@@ -138,7 +141,6 @@ function buildPdf(opts: {
 
   // Footer — stamp + signature
   const footerY = 260;
-  // Stamp circle
   doc.setDrawColor(10);
   doc.setLineWidth(1.2);
   doc.circle(margin + 18, footerY, 16);
@@ -149,7 +151,6 @@ function buildPdf(opts: {
   doc.setFontSize(6);
   doc.setFont("helvetica", "normal");
   doc.text(opts.refNum, margin + 18, footerY + 8, { align: "center" });
-  // Signature line
   doc.setDrawColor(10);
   doc.setLineWidth(0.4);
   doc.line(pageW - margin - 60, footerY + 5, pageW - margin, footerY + 5);
@@ -185,12 +186,11 @@ Deno.serve(async (req) => {
     const profile = docReq.profiles;
     if (!profile) throw new Error("Profil étudiant introuvable");
 
-    // ===== Auto-approval AI logic =====
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    // ===== Auto-approval AI logic using Gemini =====
     let decision = "approuve";
     let reason = "Étudiant inscrit, documents requis disponibles, demande conforme.";
 
-    if (LOVABLE_API_KEY) {
+    if (GEMINI_API_KEY) {
       try {
         const eligibilityCtx = `Type de document demandé : ${DOC_LABELS[docReq.type]}
 Étudiant : ${profile.prenom} ${profile.nom}
@@ -198,39 +198,33 @@ Filière : ${profile.filiere || "non renseignée"}
 Niveau : ${profile.niveau || "non renseigné"}
 CIN renseigné : ${profile.cin ? "oui" : "non"}
 Motif : ${docReq.motif || "(aucun)"}`;
-        const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
-            messages: [
-              { role: "system", content: "Tu es un agent administratif d'université tunisienne. Tu vérifies l'éligibilité d'une demande de document officiel. Réponds en JSON strict : {\"decision\":\"approuve\"|\"refuse\",\"raison\":\"phrase courte en français\"}. Refuse uniquement si des informations critiques manquent (filière, niveau pour attestation d'inscription par exemple). Sois bienveillant et auto-approuve quand c'est raisonnable." },
-              { role: "user", content: eligibilityCtx },
-            ],
-            tools: [{
-              type: "function",
-              function: {
-                name: "decide",
-                description: "Émet la décision d'approbation",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    decision: { type: "string", enum: ["approuve", "refuse"] },
-                    raison: { type: "string" },
-                  },
-                  required: ["decision", "raison"],
-                },
-              },
-            }],
-            tool_choice: { type: "function", function: { name: "decide" } },
-          }),
-        });
+
+        const geminiBody = {
+          system_instruction: {
+            parts: [{ text: "Tu es un agent administratif d'université tunisienne. Tu vérifies l'éligibilité d'une demande de document officiel. Réponds UNIQUEMENT avec un objet JSON valide, sans markdown, sans balises de code : {\"decision\":\"approuve\"|\"refuse\",\"raison\":\"phrase courte en français\"}. Refuse uniquement si des informations critiques manquent (filière, niveau pour attestation d'inscription par exemple). Sois bienveillant et auto-approuve quand c'est raisonnable." }]
+          },
+          contents: [{ role: "user", parts: [{ text: eligibilityCtx }] }],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 200,
+            responseMimeType: "application/json",
+          },
+        };
+
+        const aiResp = await fetch(
+          `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(geminiBody),
+          }
+        );
         const aiData = await aiResp.json();
-        const tc = aiData.choices?.[0]?.message?.tool_calls?.[0];
-        if (tc) {
-          const args = JSON.parse(tc.function.arguments);
-          decision = args.decision;
-          reason = args.raison;
+        const rawText = aiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (rawText) {
+          const args = JSON.parse(rawText);
+          if (args.decision) decision = args.decision;
+          if (args.raison) reason = args.raison;
         }
       } catch (err) {
         console.error("AI eligibility check failed, defaulting to approve:", err);
@@ -246,7 +240,7 @@ Motif : ${docReq.motif || "(aucun)"}`;
       });
     }
 
-    // ===== Generate PDF (HTML for now — viewable in browser, printable to PDF) =====
+    // ===== Generate PDF =====
     let extras: any = {};
     if (docReq.type === "releve_notes") {
       const { data: grades } = await admin.from("grades")

@@ -2,8 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+
+const containerVars = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+};
+const itemVars = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
+};
 
 const EmploiDuTemps = () => {
   const { profileId } = useAuth();
@@ -32,18 +42,23 @@ const EmploiDuTemps = () => {
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="animate-spin" /></div>;
 
   return (
-    <div className="space-y-8">
-      <div>
+    <motion.div 
+      className="space-y-8"
+      variants={containerVars}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={itemVars}>
         <div className="retro-tag mb-3">Emploi du temps</div>
         <h1 className="font-display text-4xl md:text-5xl">Ma semaine</h1>
-      </div>
+      </motion.div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <motion.div variants={itemVars} className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {JOURS.map((j, idx) => {
           const day = idx + 1;
           const courses = byDay[day] || [];
           return (
-            <div key={j} className="retro-card p-5">
+            <motion.div variants={itemVars} key={j} className="retro-card p-5">
               <div className="font-display text-xl mb-3 flex items-center justify-between">
                 {j}
                 <span className="text-xs text-muted-foreground font-sans font-normal">{courses.length} séance{courses.length > 1 ? "s" : ""}</span>
@@ -61,11 +76,11 @@ const EmploiDuTemps = () => {
                   ))}
                 </div>
               )}
-            </div>
+            </motion.div>
           );
         })}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

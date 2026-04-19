@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, Send, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -77,7 +78,12 @@ const Assistant = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)] lg:h-[calc(100vh-80px)] max-w-3xl mx-auto">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="flex flex-col h-[calc(100vh-100px)] lg:h-[calc(100vh-80px)] max-w-3xl mx-auto"
+    >
       <div className="mb-4">
         <div className="retro-tag mb-2"><Sparkles size={11} /> Assistant IA</div>
         <h1 className="font-display text-3xl md:text-4xl">Demande-moi tout.</h1>
@@ -97,15 +103,22 @@ const Assistant = () => {
             </div>
           </div>
         )}
+        <AnimatePresence>
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+          <motion.div 
+            key={i} 
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+          >
             <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${m.role === "user" ? "bg-foreground text-background" : "retro-soft"}`}>
               <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
                 <ReactMarkdown>{m.content || (loading && i === messages.length - 1 ? "…" : "")}</ReactMarkdown>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
+        </AnimatePresence>
       </div>
 
       <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex items-center gap-2">
@@ -115,7 +128,7 @@ const Assistant = () => {
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
         </button>
       </form>
-    </div>
+    </motion.div>
   );
 };
 
