@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { jsPDF } from "https://esm.sh/jspdf@2.5.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,75 +13,150 @@ const DOC_LABELS: Record<string, string> = {
   convention_stage: "Convention de stage",
 };
 
-function buildPdfHtml(opts: {
+function buildPdf(opts: {
   type: string; profile: any; gradesByMatiere?: any[]; moyenne?: number; mention?: string; refNum: string;
-}) {
+}): Uint8Array {
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const pageW = 210;
+  const margin = 22;
   const today = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
   const fullName = `${opts.profile.prenom || ""} ${opts.profile.nom || ""}`.trim();
 
-  let body = "";
-  if (opts.type === "releve_notes" && opts.gradesByMatiere) {
-    const rows = opts.gradesByMatiere.map((m: any) =>
-      `<tr><td>${m.nom}</td><td style="text-align:center">${m.coefficient}</td><td style="text-align:center; font-weight:600">${m.moyenne.toFixed(2)}/20</td></tr>`
-    ).join("");
-    body = `
-      <p>Le présent relevé certifie les résultats académiques obtenus par l'étudiant(e) ci-dessus pour le semestre en cours.</p>
-      <table style="width:100%; border-collapse:collapse; margin:20px 0; border:1px solid #000;">
-        <thead><tr style="background:#0a0a0a; color:#fafaf7"><th style="padding:10px; text-align:left">Matière</th><th style="padding:10px">Coef.</th><th style="padding:10px">Moyenne</th></tr></thead>
-        <tbody>${rows}</tbody>
-        <tfoot><tr style="border-top:2px solid #000; font-weight:700"><td style="padding:12px">MOYENNE GÉNÉRALE</td><td style="text-align:center">—</td><td style="text-align:center; font-size:18px">${opts.moyenne?.toFixed(2)}/20</td></tr></tfoot>
-      </table>
-      <p>Mention : <strong>${opts.mention || "—"}</strong></p>`;
-  } else if (opts.type === "attestation_inscription") {
-    body = `<p>Le Doyen de l'Université certifie que <strong>${fullName}</strong>, titulaire du CIN n° <strong>${opts.profile.cin || "—"}</strong>, est régulièrement inscrit(e) en <strong>${opts.profile.niveau || ""}</strong>, filière <strong>${opts.profile.filiere || ""}</strong>, pour l'année universitaire en cours.</p>
-    <p>La présente attestation est délivrée à l'intéressé(e) pour servir et valoir ce que de droit.</p>`;
+  // Header
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.text("EDUPORT.", margin, 24);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(100);
+  doc.text("Université Tunisienne — République Tunisienne", margin, 30);
+  doc.text(`Tunis, le ${today}`, pageW - margin, 24, { align: "right" });
+  doc.setFontSize(7);
+  doc.text(`Réf. ${opts.refNum}`, pageW - margin, 30, { align: "right" });
+  doc.setDrawColor(10);
+  doc.setLineWidth(0.6);
+  doc.line(margin, 35, pageW - margin, 35);
+
+  // Title
+  doc.setTextColor(10);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.text(DOC_LABELS[opts.type].toUpperCase(), pageW / 2, 52, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(110);
+  doc.text("Document officiel", pageW / 2, 58, { align: "center" });
+
+  // Info box
+  let y = 72;
+  doc.setFillColor(245, 243, 237);
+  doc.rect(margin, y, pageW - margin * 2, 30, "F");
+  doc.setDrawColor(10);
+  doc.setLineWidth(1.5);
+  doc.line(margin, y, margin, y + 30);
+  doc.setTextColor(10);
+  doc.setFontSize(10);
+  const infoX = margin + 5;
+  doc.setFont("helvetica", "bold"); doc.text("Nom & Prénom :", infoX, y + 7);
+  doc.setFont("helvetica", "normal"); doc.text(fullName, infoX + 32, y + 7);
+  doc.setFont("helvetica", "bold"); doc.text("CIN :", infoX, y + 14);
+  doc.setFont("helvetica", "normal"); doc.text(opts.profile.cin || "—", infoX + 32, y + 14);
+  doc.setFont("helvetica", "bold"); doc.text("Filière :", infoX, y + 21);
+  doc.setFont("helvetica", "normal"); doc.text(opts.profile.filiere || "—", infoX + 32, y + 21);
+  doc.setFont("helvetica", "bold"); doc.text("Niveau :", infoX, y + 28);
+  doc.setFont("helvetica", "normal"); doc.text(opts.profile.niveau || "—", infoX + 32, y + 28);
+
+  y += 42;
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+
+  // Body
+  const wrap = (text: string, maxW: number) => doc.splitTextToSize(text, maxW);
+  const writeP = (text: string) => {
+    const lines = wrap(text, pageW - margin * 2);
+    doc.text(lines, margin, y);
+    y += lines.length * 6 + 4;
+  };
+
+  if (opts.type === "attestation_inscription") {
+    writeP(`Le Doyen de l'Université certifie que ${fullName}, titulaire du CIN n° ${opts.profile.cin || "—"}, est régulièrement inscrit(e) en ${opts.profile.niveau || ""}, filière ${opts.profile.filiere || ""}, pour l'année universitaire en cours.`);
+    writeP("La présente attestation est délivrée à l'intéressé(e) pour servir et valoir ce que de droit.");
   } else if (opts.type === "attestation_presence") {
-    body = `<p>Nous certifions que <strong>${fullName}</strong>, étudiant(e) en <strong>${opts.profile.niveau || ""}</strong>, filière <strong>${opts.profile.filiere || ""}</strong>, est régulièrement présent(e) aux cours dispensés au sein de notre établissement.</p>
-    <p>Cette attestation est délivrée à la demande de l'intéressé(e) pour servir et valoir ce que de droit.</p>`;
+    writeP(`Nous certifions que ${fullName}, étudiant(e) en ${opts.profile.niveau || ""}, filière ${opts.profile.filiere || ""}, est régulièrement présent(e) aux cours dispensés au sein de notre établissement.`);
+    writeP("Cette attestation est délivrée à la demande de l'intéressé(e) pour servir et valoir ce que de droit.");
   } else if (opts.type === "convention_stage") {
-    body = `<p>La présente convention est établie entre l'Université et l'organisme d'accueil, en faveur de <strong>${fullName}</strong> (CIN ${opts.profile.cin || "—"}), étudiant(e) en <strong>${opts.profile.niveau || ""}</strong>, filière <strong>${opts.profile.filiere || ""}</strong>.</p>
-    <p>Elle régit les conditions du stage à effectuer dans le cadre de la formation universitaire de l'étudiant(e). Les modalités précises seront annexées au présent document.</p>`;
+    writeP(`La présente convention est établie entre l'Université et l'organisme d'accueil, en faveur de ${fullName} (CIN ${opts.profile.cin || "—"}), étudiant(e) en ${opts.profile.niveau || ""}, filière ${opts.profile.filiere || ""}.`);
+    writeP("Elle régit les conditions du stage à effectuer dans le cadre de la formation universitaire de l'étudiant(e). Les modalités précises seront annexées au présent document.");
+  } else if (opts.type === "releve_notes" && opts.gradesByMatiere) {
+    writeP("Le présent relevé certifie les résultats académiques obtenus par l'étudiant(e) ci-dessus pour le semestre en cours.");
+    y += 2;
+    // Table header
+    const colX = [margin, margin + 95, margin + 130];
+    const colW = [95, 35, pageW - margin * 2 - 130];
+    doc.setFillColor(10, 10, 10);
+    doc.rect(margin, y, pageW - margin * 2, 9, "F");
+    doc.setTextColor(250, 250, 247);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("Matière", colX[0] + 3, y + 6);
+    doc.text("Coef.", colX[1] + colW[1] / 2, y + 6, { align: "center" });
+    doc.text("Moyenne", colX[2] + colW[2] / 2, y + 6, { align: "center" });
+    y += 9;
+    // Rows
+    doc.setTextColor(10);
+    doc.setFont("helvetica", "normal");
+    opts.gradesByMatiere.forEach((m: any, i: number) => {
+      if (i % 2 === 0) { doc.setFillColor(248, 248, 245); doc.rect(margin, y, pageW - margin * 2, 8, "F"); }
+      doc.text(String(m.nom).slice(0, 50), colX[0] + 3, y + 5.5);
+      doc.text(String(m.coefficient), colX[1] + colW[1] / 2, y + 5.5, { align: "center" });
+      doc.setFont("helvetica", "bold");
+      doc.text(`${m.moyenne.toFixed(2)}/20`, colX[2] + colW[2] / 2, y + 5.5, { align: "center" });
+      doc.setFont("helvetica", "normal");
+      y += 8;
+    });
+    // Total
+    doc.setLineWidth(0.6);
+    doc.line(margin, y, pageW - margin, y);
+    y += 2;
+    doc.setFillColor(10, 10, 10);
+    doc.rect(margin, y, pageW - margin * 2, 11, "F");
+    doc.setTextColor(250, 250, 247);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("MOYENNE GÉNÉRALE", colX[0] + 3, y + 7);
+    doc.setFontSize(13);
+    doc.text(`${opts.moyenne?.toFixed(2)}/20`, colX[2] + colW[2] / 2, y + 7.5, { align: "center" });
+    y += 16;
+    doc.setTextColor(10);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text("Mention : ", margin, y);
+    doc.setFont("helvetica", "bold");
+    doc.text(opts.mention || "—", margin + 20, y);
+    y += 8;
   }
 
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${DOC_LABELS[opts.type]}</title>
-  <style>
-    @page { size: A4; margin: 22mm; }
-    body { font-family: Georgia, 'Times New Roman', serif; color: #0a0a0a; line-height: 1.6; max-width: 800px; margin: 0 auto; }
-    .header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #0a0a0a; padding-bottom:14px; margin-bottom:30px; }
-    .logo { font-family:'Helvetica',sans-serif; font-weight:900; font-size:28px; letter-spacing:-1px; }
-    .meta { text-align:right; font-size:11px; color:#555; }
-    h1 { font-family:'Helvetica',sans-serif; font-size:26px; text-transform:uppercase; letter-spacing:1px; text-align:center; margin:30px 0 8px; }
-    .subtitle { text-align:center; color:#555; font-size:12px; margin-bottom:30px; }
-    .infos { background:#f5f3ed; border-left:4px solid #0a0a0a; padding:14px 20px; margin:20px 0; font-size:14px; }
-    .footer { margin-top:60px; display:flex; justify-content:space-between; align-items:flex-end; }
-    .signature { text-align:right; }
-    .signature-line { border-top:1px solid #000; padding-top:5px; margin-top:50px; font-size:11px; }
-    .stamp { width:90px; height:90px; border:2px solid #0a0a0a; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:10px; text-align:center; transform:rotate(-8deg); }
-    .ref { font-family: monospace; font-size:11px; color:#555; }
-  </style></head><body>
-    <div class="header">
-      <div>
-        <div class="logo">EDUPORT.</div>
-        <div style="font-size:11px; color:#555">Université Tunisienne — République Tunisienne</div>
-      </div>
-      <div class="meta">Tunis, le ${today}<br/><span class="ref">Réf. ${opts.refNum}</span></div>
-    </div>
-    <h1>${DOC_LABELS[opts.type]}</h1>
-    <div class="subtitle">Document officiel</div>
-    <div class="infos">
-      <strong>Nom & Prénom :</strong> ${fullName}<br/>
-      <strong>CIN :</strong> ${opts.profile.cin || "—"}<br/>
-      <strong>Filière :</strong> ${opts.profile.filiere || "—"}<br/>
-      <strong>Niveau :</strong> ${opts.profile.niveau || "—"}
-    </div>
-    ${body}
-    <div class="footer">
-      <div class="stamp">SIGNÉ<br/>NUMÉRIQUEMENT</div>
-      <div class="signature">
-        <div class="signature-line">Service Scolarité</div>
-      </div>
-    </div>
-  </body></html>`;
+  // Footer — stamp + signature
+  const footerY = 260;
+  // Stamp circle
+  doc.setDrawColor(10);
+  doc.setLineWidth(1.2);
+  doc.circle(margin + 18, footerY, 16);
+  doc.setFontSize(7);
+  doc.setFont("helvetica", "bold");
+  doc.text("SIGNÉ", margin + 18, footerY - 2, { align: "center" });
+  doc.text("NUMÉRIQUEMENT", margin + 18, footerY + 3, { align: "center" });
+  doc.setFontSize(6);
+  doc.setFont("helvetica", "normal");
+  doc.text(opts.refNum, margin + 18, footerY + 8, { align: "center" });
+  // Signature line
+  doc.setDrawColor(10);
+  doc.setLineWidth(0.4);
+  doc.line(pageW - margin - 60, footerY + 5, pageW - margin, footerY + 5);
+  doc.setFontSize(9);
+  doc.text("Service Scolarité", pageW - margin, footerY + 10, { align: "right" });
+
+  return doc.output("arraybuffer") as unknown as Uint8Array;
 }
 
 Deno.serve(async (req) => {
