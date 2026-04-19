@@ -269,15 +269,14 @@ Motif : ${docReq.motif || "(aucun)"}`;
     }
 
     const refNum = `EP-${new Date().getFullYear()}-${requestId.slice(0, 8).toUpperCase()}`;
-    const html = buildPdfHtml({ type: docReq.type, profile, refNum, ...extras });
+    const pdfBytes = buildPdf({ type: docReq.type, profile, refNum, ...extras });
 
-    // Upload HTML to storage (browser-renderable, "PDF-style")
-    const path = `${profile.user_id}/${docReq.type}-${requestId}.html`;
+    const path = `${profile.user_id}/${docReq.type}-${requestId}.pdf`;
     const { error: uploadErr } = await admin.storage.from("documents")
-      .upload(path, new Blob([html], { type: "text/html" }), { upsert: true, contentType: "text/html" });
+      .upload(path, new Blob([pdfBytes], { type: "application/pdf" }), { upsert: true, contentType: "application/pdf" });
     if (uploadErr) throw uploadErr;
 
-    const { data: signed } = await admin.storage.from("documents").createSignedUrl(path, 60 * 60 * 24 * 7);
+    const { data: signed } = await admin.storage.from("documents").createSignedUrl(path, 60 * 60 * 24 * 7, { download: `${DOC_LABELS[docReq.type]}.pdf` });
 
     await admin.from("document_requests").update({
       statut: "approuve",
