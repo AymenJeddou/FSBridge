@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -15,6 +15,14 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const nav = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const modeFromQuery = new URLSearchParams(location.search).get("mode");
+    if (modeFromQuery === "signup") {
+      setMode("signup");
+    }
+  }, [location.search]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -49,7 +49,7 @@ const Landing = () => {
               Notes, emploi du temps, professeurs, documents officiels — et un assistant IA qui répond à toutes tes questions.
             </p>
             <div className="flex flex-wrap items-center gap-4">
-              <Link to="/auth" className="group inline-flex items-center gap-2 bg-foreground text-background px-7 py-4 rounded-full font-semibold hover:translate-y-[-2px] transition-transform">
+              <Link to="/auth?mode=signup" className="group inline-flex items-center gap-2 bg-foreground text-background px-7 py-4 rounded-full font-semibold hover:translate-y-[-2px] transition-transform">
                 Commencer
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>
