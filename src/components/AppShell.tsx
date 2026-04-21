@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { LayoutDashboard, GraduationCap, User, Users, Calendar, FileText, Sparkles, LogOut, ShieldCheck, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { BrandMark } from "@/components/BrandMark";
 
 const studentLinks = [
   { to: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
@@ -28,7 +29,10 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
       {/* Top bar — mobile */}
       <header className="lg:hidden sticky top-0 z-40 border-b-2 border-foreground bg-background">
         <div className="flex items-center justify-between px-4 py-3">
-          <button onClick={() => navigate("/dashboard")} className="font-display text-xl">EduPort.</button>
+          <button onClick={() => navigate("/dashboard")} className="inline-flex items-center gap-2">
+            <BrandMark className="w-8 h-8" />
+            <span className="font-display text-xl">FSBridge</span>
+          </button>
           <button onClick={() => setOpen(!open)} className="p-2 border-2 border-foreground rounded-full">
             {open ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -42,9 +46,9 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}>
           <div className="flex items-center gap-2 mb-10">
-            <div className="w-10 h-10 bg-foreground text-background rounded-full grid place-items-center font-display">E.</div>
+            <BrandMark className="w-10 h-10" />
             <div>
-              <div className="font-display text-xl leading-none">EduPort.</div>
+              <div className="font-display text-xl leading-none">FSBridge</div>
               <div className="text-xs text-muted-foreground">Portail étudiant</div>
             </div>
           </div>
