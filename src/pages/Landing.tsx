@@ -10,10 +10,10 @@ const Landing = () => {
       <header className="border-b-2 border-foreground">
         <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-foreground text-background rounded-full grid place-items-center font-display">E.</div>
-            <span className="font-display text-xl">EduPort.</span>
+            <img src="/favicon.png" alt="FSBridge" className="w-15 h-14 rounded-full ring-2 ring-foreground/10 shadow-sm object-cover" />
+            <span className="font-display text-2xl md:text-3xl leading-none">FSBridge</span>
           </div>
-          <Link to="/auth" className="px-5 py-2.5 bg-foreground text-background rounded-full font-semibold text-sm hover:bg-foreground/90 transition">
+          <Link to="/auth" className="px-7 py-3 bg-foreground text-background rounded-full font-semibold text-base hover:bg-foreground/90 transition shadow-sm">
             Se connecter →
           </Link>
         </div>
@@ -24,9 +24,9 @@ const Landing = () => {
         <div className="flex gap-12 py-3 animate-marquee whitespace-nowrap font-display text-sm uppercase tracking-widest">
           {Array.from({ length: 2 }).map((_, k) => (
             <div key={k} className="flex gap-12 shrink-0">
-              {["Notation /20", "Système tunisien", "Assistant IA", "Documents auto", "Bulletins", "Suivi en temps réel", "100% en français"].map((t, i) => (
+              {["Inscriptions ouvertes", "Résultats publiés", "Emplois du temps mis à jour", "Demandes de documents", "Alertes administratives", "Messagerie étudiant", "Accès sécurisé"].map((t, i) => (
                 <span key={i} className="flex items-center gap-12">{t} <span className="text-foreground/60">✦</span></span>
-              ))}
+              ))} 
             </div>
           ))}
         </div>
@@ -36,9 +36,6 @@ const Landing = () => {
       <section className="relative">
         <div className="max-w-7xl mx-auto px-6 py-16 lg:py-24 grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7 relative">
-            <div className="retro-tag mb-6">
-              <Sparkles size={12} /> Nouvelle génération
-            </div>
             <h1 className="font-display text-5xl md:text-7xl lg:text-[5.5rem] leading-[0.92] mb-6">
               Ton portail
               <br />
@@ -50,10 +47,9 @@ const Landing = () => {
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl mb-8 leading-relaxed">
               Notes, emploi du temps, professeurs, documents officiels — et un assistant IA qui répond à toutes tes questions.
-              Conçu pour le système universitaire tunisien <span className="font-mono text-foreground">/20</span>.
             </p>
             <div className="flex flex-wrap items-center gap-4">
-              <Link to="/auth" className="group inline-flex items-center gap-2 bg-foreground text-background px-7 py-4 rounded-full font-semibold hover:translate-y-[-2px] transition-transform">
+              <Link to="/auth?mode=signup" className="group inline-flex items-center gap-2 bg-foreground text-background px-7 py-4 rounded-full font-semibold hover:translate-y-[-2px] transition-transform">
                 Commencer
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -176,7 +172,7 @@ const Landing = () => {
       </section>
 
       <footer className="border-t-2 border-foreground py-8 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} EduPort. — Système /20 • Tunisie
+        © {new Date().getFullYear()} FSBridge • Tunisie
       </footer>
     </div>
   );

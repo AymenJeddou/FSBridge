@@ -4,6 +4,7 @@ import { Loader2, Send, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { hasSupabaseConfig } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -26,6 +27,10 @@ const Assistant = () => {
 
   const send = async (text: string) => {
     if (!text.trim() || loading || !session) return;
+    if (!hasSupabaseConfig) {
+      toast({ title: "Assistant indisponible", description: "Le backend Supabase n'est pas configure en mode local.", variant: "destructive" });
+      return;
+    }
     const userMsg: Msg = { role: "user", content: text };
     const next = [...messages, userMsg];
     setMessages(next);

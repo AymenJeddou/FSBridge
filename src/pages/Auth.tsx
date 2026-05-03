@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -15,6 +15,14 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const nav = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const modeFromQuery = new URLSearchParams(location.search).get("mode");
+    if (modeFromQuery === "signup") {
+      setMode("signup");
+    }
+  }, [location.search]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,10 +63,10 @@ const Auth = () => {
             espace.
           </div>
           <p className="text-background/60 max-w-sm">
-            Tes notes, ton planning, tes documents — et un assistant qui répond à tout. En français, /20.
+            Tes notes, ton planning, tes documents — et un assistant qui répond à tout.
           </p>
         </div>
-        <div className="text-xs text-background/40 font-mono">EduPort. — v1.0</div>
+        <div className="text-xs text-background/40 font-mono">FSBridge— v1.0</div>
         <StarSpark className="absolute top-20 right-12 w-32 h-32 text-accent animate-float-slow" />
         <Squiggle className="absolute bottom-32 left-12 w-64 h-6 text-accent" />
       </div>
