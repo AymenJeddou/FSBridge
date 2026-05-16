@@ -309,8 +309,8 @@ function LoginPage({ onSubmit, onGoogleLogin, brandName = "YourBrand" }: Animate
       <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-primary/90 via-primary to-primary/80 p-12 text-primary-foreground lg:flex">
         <div className="relative z-20">
           <div className="flex items-center gap-2 text-lg font-semibold">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary-foreground/10 backdrop-blur-sm">
-              <Sparkles className="size-4" />
+            <div className="flex size-12 items-center justify-center rounded-lg bg-white backdrop-blur-sm overflow-hidden border-2 border-foreground/10 shadow-md">
+              <img src="/logo.png" alt="FSBridge Logo" className="w-10 h-10 object-contain" />
             </div>
             <span>{brandName}</span>
           </div>
@@ -543,8 +543,8 @@ function LoginPage({ onSubmit, onGoogleLogin, brandName = "YourBrand" }: Animate
       <div className="flex items-center justify-center bg-background p-8">
         <div className="w-full max-w-[420px]">
           <div className="mb-12 flex items-center justify-center gap-2 text-lg font-semibold lg:hidden">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
-              <Sparkles className="size-4 text-primary" />
+            <div className="flex size-12 items-center justify-center rounded-lg bg-white overflow-hidden border-2 border-foreground/10 shadow-md">
+              <img src="/logo.png" alt="FSBridge Logo" className="w-10 h-10 object-contain" />
             </div>
             <span>{brandName}</span>
           </div>
