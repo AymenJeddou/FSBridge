@@ -10,8 +10,8 @@ const Landing = () => {
       <header className="border-b-2 border-foreground">
         <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/favicon.png" alt="FSBridge" className="w-15 h-14 rounded-full ring-2 ring-foreground/10 shadow-sm object-cover" />
-            <span className="font-display text-2xl md:text-3xl leading-none">FSBridge</span>
+            <img src="/logo.png" alt="FSBridge Logo" className="w-16 h-16 object-contain" />
+            <span className="font-display text-xl">FSBridge.</span>
           </div>
           <Link to="/auth" className="px-7 py-3 bg-foreground text-background rounded-full font-semibold text-base hover:bg-foreground/90 transition shadow-sm">
             Se connecter →
@@ -172,7 +172,7 @@ const Landing = () => {
       </section>
 
       <footer className="border-t-2 border-foreground py-8 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} FSBridge • Tunisie
+        © {new Date().getFullYear()} FSBridge. — Système /20 • Tunisie
       </footer>
     </div>
   );

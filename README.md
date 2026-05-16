@@ -1,15 +1,15 @@
-# FSBridge - Mon Portail Étudiant 
+# FSBridge - Mon Portail Étudiant 🎓
 
 **FSBridge** is a next-generation academic portal designed specifically to meet the needs of university students (with a focus on the Faculté des Sciences de Bizerte - FSB). More than just a tool for checking grades, FSBridge acts as a "bridge" between the student, the administration, and academic knowledge by integrating an advanced Artificial Intelligence layer.
 
-##  Key Features
+## 🌟 Key Features
 
 - **Intelligent Dashboard:** A centralized hub summarizing the student's academic situation, including automatic GPA calculation (20-point system), grade visualization by teaching unit (UE), and automatic honors calculation based on Tunisian grading scales.
 - **AI Assistant (FSB Assistant):** An integrated AI powered by Google's Gemini to answer questions about schedules or classrooms, explain course concepts from imported documents, and analyze academic performance to suggest areas for improvement.
 - **Document Management & Administration:** Automatic generation of PDF documents such as certificates of attendance, transcripts, and internship agreements.
 - **Dynamic Timetable:** A clear, responsive weekly schedule view with quick identification of session types (Lectures, Tutorials, Practicals) and responsible professors.
 
-##  Tech Stack
+## 🛠️ Tech Stack
 
 This project is built with a modern, cloud-native, and type-safe architecture:
 
@@ -21,14 +21,14 @@ This project is built with a modern, cloud-native, and type-safe architecture:
 - **UI Components:** [shadcn/ui](https://ui.shadcn.com/) & [Radix UI](https://www.radix-ui.com/)
 - **Animations:** [Framer Motion](https://www.framer.com/motion/)
 
-##  Design System
+## 🎨 Design System
 
 The project utilizes a strong visual identity named **FSBridge Design System**:
 - **Colors:** Predominantly Black and Yellow (Accent) for maximum readability and a premium "Brutalist/Retro" look.
 - **Typography:** Grotesque fonts for a professional and modern aesthetic.
 - **Interactivity:** Smooth animations to enhance user engagement without weighing down the application.
 
-##  Getting Started
+## 🚀 Getting Started
 
 To get a local copy up and running, follow these simple steps.
 
@@ -66,10 +66,11 @@ To get a local copy up and running, follow these simple steps.
 5. Open your browser and navigate to the local URL provided by Vite (usually `http://localhost:8080` or `http://localhost:5173`).
 
 ## 🔮 Future Roadmap
-- **Research Agent: an agent that pulls research articles related to students every 24hours (using Zapier)
+
+- **Research Agent:** An agent that pulls research articles related to students every 24 hours (using Zapier/n8n and NotebookLM).
 - **Native Mobile App:** Development of a mobile application for real-time push notifications.
 - **Professor Module:** Allow teachers to enter grades and communicate directly with their student groups.
-- **Admin Module:** Allow Technical staff to create student account and manage all students.
+- **Admin Module:** Allow Technical staff to create student accounts and manage all students.
 - **Payment Integration:** Enable payment of registration fees or related services directly through the portal.
 
 ## 📝 License
