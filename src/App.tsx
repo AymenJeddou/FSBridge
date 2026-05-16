@@ -17,6 +17,7 @@ import EmploiDuTemps from "./pages/EmploiDuTemps";
 import Documents from "./pages/Documents";
 import Assistant from "./pages/Assistant";
 import Admin from "./pages/Admin";
+import Actualites from "./pages/Actualites";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/documents" element={<Shell><Documents /></Shell>} />
             <Route path="/assistant" element={<Shell><Assistant /></Shell>} />
             <Route path="/admin" element={<RequireAuth role="admin"><AppShell><Admin /></AppShell></RequireAuth>} />
+            <Route path="/actualites" element={<Actualites />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

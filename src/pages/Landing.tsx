@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, FileText, GraduationCap, Calendar, Bot } from "lucide-react";
+import { ArrowRight, Sparkles, FileText, GraduationCap, Calendar, Bot, Newspaper } from "lucide-react";
 import { ScribbleArrow, StarSpark, Squiggle, StudentDoodle, ChartDoodle, PaperPlane, StackBooks } from "@/components/Doodles";
 import { PublicChatbot } from "@/components/PublicChatbot";
 import { EmbeddedChatbot } from "@/components/EmbeddedChatbot";
@@ -15,9 +15,18 @@ const Landing = () => {
             <img src="/logo.png" alt="FSBridge Logo" className="w-16 h-16 object-contain" />
             <span className="font-display text-xl">FSBridge.</span>
           </div>
-          <Link to="/auth" className="px-7 py-3 bg-foreground text-background rounded-full font-semibold text-base hover:bg-foreground/90 transition shadow-sm">
-            Se connecter →
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/actualites"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-foreground text-sm font-semibold hover:bg-foreground hover:text-background transition"
+            >
+              <Newspaper size={15} />
+              Actualités
+            </Link>
+            <Link to="/auth" className="px-7 py-3 bg-foreground text-background rounded-full font-semibold text-base hover:bg-foreground/90 transition shadow-sm">
+              Se connecter →
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -28,7 +37,7 @@ const Landing = () => {
             <div key={k} className="flex gap-12 shrink-0">
               {["Inscriptions ouvertes", "Résultats publiés", "Emplois du temps mis à jour", "Demandes de documents", "Alertes administratives", "Messagerie étudiant", "Accès sécurisé"].map((t, i) => (
                 <span key={i} className="flex items-center gap-12">{t} <span className="text-foreground/60">✦</span></span>
-              ))} 
+              ))}
             </div>
           ))}
         </div>

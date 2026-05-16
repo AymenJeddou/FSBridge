@@ -23,8 +23,6 @@ const Dashboard = () => {
   const [moy, setMoy] = useState(0);
   const [todayCourses, setTodayCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
-  const [seeded, setSeeded] = useState(false);
 
   const load = async () => {
     if (!profileId || !user) return;
@@ -57,14 +55,6 @@ const Dashboard = () => {
 
   useEffect(() => { load(); }, [profileId]);
 
-  const seed = async () => {
-    setSeeding(true);
-    try {
-      await supabase.functions.invoke("seed-demo");
-      setSeeded(true);
-      await load();
-    } finally { setSeeding(false); }
-  };
 
   const m = mention(moy);
   const heure = new Date().getHours();
@@ -87,12 +77,6 @@ const Dashboard = () => {
             {greeting}, <span className="relative inline-block">{profile?.prenom || "étudiant"}.<Squiggle className="absolute -bottom-2 left-0 w-full h-2 text-accent" /></span>
           </h1>
         </div>
-        {!profile?.filiere && (
-          <button onClick={seed} disabled={seeding || seeded} className="bg-foreground text-background px-5 py-3 rounded-full font-semibold text-sm flex items-center gap-2">
-            {seeding && <Loader2 size={14} className="animate-spin" />}
-            {seeded ? "Données chargées ✓" : "Charger des données démo"}
-          </button>
-        )}
       </motion.div>
 
       {/* Hero stats */}
