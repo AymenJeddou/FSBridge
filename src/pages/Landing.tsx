@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, FileText, GraduationCap, Calendar, Bot } from "lucide-react";
 import { ScribbleArrow, StarSpark, Squiggle, StudentDoodle, ChartDoodle, PaperPlane, StackBooks } from "@/components/Doodles";
+import { PublicChatbot } from "@/components/PublicChatbot";
+import { EmbeddedChatbot } from "@/components/EmbeddedChatbot";
 
 const Landing = () => {
   return (
@@ -153,6 +155,43 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Embedded Chatbot Section */}
+      <section id="chatbot-section" className="border-t-2 border-foreground bg-background relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 py-20 lg:py-24 grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="font-display text-4xl md:text-5xl mb-6">
+              Posez toutes
+              <br />
+              vos questions.
+              <br />
+              <span className="bg-accent px-2">L'IA vous répond.</span>
+            </h2>
+            <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-md">
+              Inscriptions, filières, emplois du temps ou vie étudiante à la FSB... Notre assistant intelligent parcourt la base de données officielle pour vous donner des réponses précises instantanément.
+            </p>
+            <ul className="space-y-4 mb-8">
+              {[
+                "Quelles sont les filières disponibles ?",
+                "Comment faire ma pré-inscription ?",
+                "Où se trouve le département d'informatique ?"
+              ].map((q, i) => (
+                <li key={i} className="flex items-center gap-3 font-medium">
+                  <div className="w-6 h-6 rounded-full bg-accent border-2 border-foreground flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold">{i + 1}</span>
+                  </div>
+                  {q}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="relative z-10">
+            <EmbeddedChatbot />
+            <StarSpark className="absolute -top-10 -right-10 w-20 h-20 text-accent animate-pulse hidden md:block" />
+            <Squiggle className="absolute -bottom-8 -left-8 w-24 h-12 text-foreground hidden md:block" />
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="border-t-2 border-foreground">
         <div className="max-w-7xl mx-auto px-6 py-20 text-center">
@@ -174,6 +213,8 @@ const Landing = () => {
       <footer className="border-t-2 border-foreground py-8 text-center text-sm text-muted-foreground">
         © {new Date().getFullYear()} FSBridge. — Système /20 • Tunisie
       </footer>
+
+      <PublicChatbot />
     </div>
   );
 };
