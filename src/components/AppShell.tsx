@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { LayoutDashboard, GraduationCap, User, Users, Calendar, FileText, Sparkles, LogOut, ShieldCheck, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { BrandMark } from "@/components/BrandMark";
 
 const studentLinks = [
   { to: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
@@ -30,7 +29,9 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
       <header className="lg:hidden sticky top-0 z-40 border-b-2 border-foreground bg-background">
         <div className="flex items-center justify-between px-4 py-3">
           <button onClick={() => navigate("/dashboard")} className="inline-flex items-center gap-2">
-            <BrandMark className="w-8 h-8" />
+            <div className="w-10 h-10 rounded-full bg-white border-2 border-foreground p-1 flex items-center justify-center shadow-sm">
+              <img src="/logo.png" alt="FSBridge" className="w-full h-full object-contain" />
+            </div>
             <span className="font-display text-xl">FSBridge</span>
           </button>
           <button onClick={() => setOpen(!open)} className="p-2 border-2 border-foreground rounded-full">
@@ -46,7 +47,9 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}>
           <div className="flex items-center gap-2 mb-10">
-            <BrandMark className="w-10 h-10" />
+            <div className="w-12 h-12 rounded-full bg-white border-2 border-foreground p-1 flex items-center justify-center shadow-sm">
+              <img src="/logo.png" alt="FSBridge" className="w-full h-full object-contain" />
+            </div>
             <div>
               <div className="font-display text-xl leading-none">FSBridge</div>
               <div className="text-xs text-muted-foreground">Portail étudiant</div>
