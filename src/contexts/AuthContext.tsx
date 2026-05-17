@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
-import { hasSupabaseConfig } from "@/integrations/supabase/client";
 
 type Role = "admin" | "professor" | "student";
 
@@ -37,11 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    if (!hasSupabaseConfig) {
-      setLoading(false);
-      return;
-    }
-
+    // Always set up auth — both real Supabase and mock client implement onAuthStateChange
     const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
       setSession(sess);
       setUser(sess?.user ?? null);
