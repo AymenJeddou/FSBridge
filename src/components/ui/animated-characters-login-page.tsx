@@ -12,6 +12,7 @@ type LoginSubmitResult = { error?: string };
 
 interface AnimatedCharactersLoginPageProps {
   onSubmit?: (params: { email: string; password: string; remember: boolean }) => Promise<LoginSubmitResult | void>;
+  onSignUp?: (params: { email: string; password: string; fullName: string }) => Promise<LoginSubmitResult | void>;
   onGoogleLogin?: () => void;
   brandName?: string;
 }
@@ -168,11 +169,13 @@ const EyeBall = ({
   );
 };
 
-function LoginPage({ onSubmit, onGoogleLogin, brandName = "YourBrand" }: AnimatedCharactersLoginPageProps) {
+function LoginPage({ onSubmit, onSignUp, onGoogleLogin, brandName = "YourBrand" }: AnimatedCharactersLoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [mouseX, setMouseX] = useState<number>(0);
@@ -291,13 +294,28 @@ function LoginPage({ onSubmit, onGoogleLogin, brandName = "YourBrand" }: Animate
     setIsLoading(true);
 
     try {
-      if (onSubmit) {
-        const result = await onSubmit({ email, password, remember });
-        if (result && result.error) {
-          setError(result.error);
+      if (isSignUp) {
+        if (password.length < 6) {
+          setError("Le mot de passe doit contenir au moins 6 caractères.");
+          return;
         }
-      } else if (!(email === "erik@gmail.com" && password === "1234")) {
-        setError("Invalid email or password. Please try again.");
+        if (!fullName.trim()) {
+          setError("Veuillez entrer votre nom complet.");
+          return;
+        }
+        if (onSignUp) {
+          const result = await onSignUp({ email, password, fullName: fullName.trim() });
+          if (result && result.error) {
+            setError(result.error);
+          }
+        }
+      } else {
+        if (onSubmit) {
+          const result = await onSubmit({ email, password, remember });
+          if (result && result.error) {
+            setError(result.error);
+          }
+        }
       }
     } finally {
       setIsLoading(false);
@@ -550,11 +568,31 @@ function LoginPage({ onSubmit, onGoogleLogin, brandName = "YourBrand" }: Animate
           </div>
 
           <div className="mb-10 text-center">
-            <h1 className="mb-2 text-3xl font-bold tracking-tight">Welcome back!</h1>
-            <p className="text-sm text-muted-foreground">Please enter your details</p>
+            <h1 className="mb-2 text-3xl font-bold tracking-tight">{isSignUp ? "Créer un compte" : "Welcome back!"}</h1>
+            <p className="text-sm text-muted-foreground">{isSignUp ? "Remplissez vos informations pour vous inscrire" : "Please enter your details"}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {isSignUp && (
+              <div className="space-y-2">
+                <Label htmlFor="fullName" className="text-sm font-medium">
+                  Nom complet
+                </Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="Votre nom complet"
+                  value={fullName}
+                  autoComplete="name"
+                  onChange={(e) => setFullName(e.target.value)}
+                  onFocus={() => setIsTyping(true)}
+                  onBlur={() => setIsTyping(false)}
+                  required
+                  className="h-12 border-border/60 bg-background focus:border-primary"
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">
                 Email
@@ -562,7 +600,7 @@ function LoginPage({ onSubmit, onGoogleLogin, brandName = "YourBrand" }: Animate
               <Input
                 id="email"
                 type="email"
-                placeholder="anna@gmail.com"
+                placeholder="votre.email@example.com"
                 value={email}
                 autoComplete="off"
                 onChange={(e) => setEmail(e.target.value)}
@@ -598,42 +636,50 @@ function LoginPage({ onSubmit, onGoogleLogin, brandName = "YourBrand" }: Animate
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="remember" checked={remember} onCheckedChange={(checked) => setRemember(Boolean(checked))} />
-                <Label htmlFor="remember" className="cursor-pointer text-sm font-normal">
-                  Remember for 30 days
-                </Label>
+            {!isSignUp && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="remember" checked={remember} onCheckedChange={(checked) => setRemember(Boolean(checked))} />
+                  <Label htmlFor="remember" className="cursor-pointer text-sm font-normal">
+                    Remember for 30 days
+                  </Label>
+                </div>
+                <a href="#" className="text-sm font-medium text-primary hover:underline">
+                  Forgot password?
+                </a>
               </div>
-              <a href="#" className="text-sm font-medium text-primary hover:underline">
-                Forgot password?
-              </a>
-            </div>
+            )}
 
             {error && <div className="rounded-lg border border-red-900/30 bg-red-950/20 p-3 text-sm text-red-400">{error}</div>}
 
             <Button type="submit" className="h-12 w-full text-base font-medium" size="lg" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Log in"}
+              {isLoading ? (isSignUp ? "Inscription..." : "Connexion...") : (isSignUp ? "S'inscrire" : "Se connecter")}
             </Button>
           </form>
 
-          <div className="mt-6">
-            <Button
-              variant="outline"
-              className="h-12 w-full border-border/60 bg-background hover:bg-accent"
-              type="button"
-              onClick={onGoogleLogin}
-            >
-              <Mail className="mr-2 size-5" />
-              Log in with Google
-            </Button>
-          </div>
+          {!isSignUp && (
+            <div className="mt-6">
+              <Button
+                variant="outline"
+                className="h-12 w-full border-border/60 bg-background hover:bg-accent"
+                type="button"
+                onClick={onGoogleLogin}
+              >
+                <Mail className="mr-2 size-5" />
+                Se connecter avec Google
+              </Button>
+            </div>
+          )}
 
           <div className="mt-8 text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <a href="#" className="font-medium text-foreground hover:underline">
-              Sign Up
-            </a>
+            {isSignUp ? "Vous avez déjà un compte ?" : "Vous n'avez pas de compte ?"}{" "}
+            <button
+              type="button"
+              onClick={() => { setIsSignUp(!isSignUp); setError(""); setFullName(""); }}
+              className="font-medium text-foreground hover:underline"
+            >
+              {isSignUp ? "Se connecter" : "S'inscrire"}
+            </button>
           </div>
         </div>
       </div>
