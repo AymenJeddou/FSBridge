@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -9,6 +9,7 @@ import {
   RefreshCw,
   Newspaper,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 
@@ -115,7 +116,7 @@ const ArticleCard = ({
   <motion.article
     initial={{ opacity: 0, y: 24 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: index * 0.08, duration: 0.4 }}
+    transition={{ delay: index < 3 ? index * 0.08 : 0, duration: 0.4 }}
     className="retro-card retro-card-hover flex flex-col cursor-pointer overflow-hidden"
     onClick={onClick}
     role="button"
@@ -248,6 +249,38 @@ const Actualites = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Article | null>(null);
+  const [visibleCount, setVisibleCount] = useState(3);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [agentMessage, setAgentMessage] = useState("");
+  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+
+  const handleGenerate = () => {
+    if (isGenerating) return;
+    setIsGenerating(true);
+    
+    setAgentMessage("🤖 [Agent] Analyse de l'actualité universitaire...");
+    
+    const t1 = setTimeout(() => {
+      setAgentMessage("🔍 [Agent] Recherche de sources fiables de la FSB...");
+    }, 700);
+
+    const t2 = setTimeout(() => {
+      setAgentMessage("✍️ [Agent] Rédaction et validation de l'article...");
+    }, 1400);
+
+    const t3 = setTimeout(() => {
+      setVisibleCount((prev) => prev + 1);
+      setIsGenerating(false);
+    }, 2000);
+
+    timeoutsRef.current = [t1, t2, t3];
+  };
+
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach(clearTimeout);
+    };
+  }, []);
 
   // ── Fetch articles ──────────────────────────────────────────────────────────
 
@@ -263,6 +296,7 @@ const Actualites = () => {
 
       if (error) throw error;
       setArticles(data || []);
+      setVisibleCount(3);
     } catch (err: any) {
       console.error("Fetch articles error:", err);
       setError("Impossible de charger les articles. Veuillez réessayer.");
@@ -376,15 +410,31 @@ const Actualites = () => {
 
         {/* Article grid */}
         {!loading && !error && articles.length > 0 && (
-          <div className="grid md:grid-cols-2 gap-6">
-            {articles.map((a, i) => (
-              <ArticleCard
-                key={a.id}
-                article={a}
-                index={i}
-                onClick={() => setSelected(a)}
-              />
-            ))}
+          <div className="space-y-12">
+            <div className="grid md:grid-cols-2 gap-6">
+              {articles.slice(0, visibleCount).map((a, i) => (
+                <ArticleCard
+                  key={a.id}
+                  article={a}
+                  index={i}
+                  onClick={() => setSelected(a)}
+                />
+              ))}
+            </div>
+
+            {/* Generate Article Button */}
+            {visibleCount < articles.length && (
+              <div className="flex justify-center pt-4">
+                <button
+                  onClick={handleGenerate}
+                  disabled={isGenerating}
+                  className="retro-card retro-card-hover bg-accent text-foreground hover:bg-foreground hover:text-background font-display px-8 py-4 border-2 border-foreground rounded-full flex items-center gap-3 transition-all duration-300 disabled:opacity-85 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-hard"
+                >
+                  <Sparkles size={18} className={isGenerating ? "animate-spin" : ""} />
+                  {isGenerating ? "Génération..." : "Générer un article"}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -393,6 +443,36 @@ const Actualites = () => {
       <footer className="border-t-2 border-foreground py-8 text-center text-sm text-muted-foreground mt-8">
         © {new Date().getFullYear()} FSBridge — Faculté des Sciences de Bizerte
       </footer>
+
+      {/* ── Agent Loading Status Popup ── */}
+      <AnimatePresence>
+        {isGenerating && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="fixed bottom-6 right-6 z-50 retro-card bg-foreground text-background border-2 border-background p-4 shadow-hard max-w-sm flex items-center gap-3.5 font-mono text-xs"
+            style={{
+              boxShadow: "4px 4px 0 0 hsl(var(--accent))",
+            }}
+          >
+            {/* Pulsing indicator */}
+            <span className="relative flex h-3 w-3 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-accent"></span>
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-accent mb-0.5 tracking-wider uppercase">
+                Agent Actif • FSBridge AI
+              </div>
+              <p className="truncate text-background/90 font-medium">
+                {agentMessage}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Article detail modal ── */}
       {selected && (
