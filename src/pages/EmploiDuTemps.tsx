@@ -16,22 +16,31 @@ const itemVars = {
 };
 
 const EmploiDuTemps = () => {
-  const { profileId } = useAuth();
+  const { profileId, role } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       if (!profileId) return;
-      const { data: me } = await supabase.from("profiles").select("filiere").eq("id", profileId).maybeSingle();
-      const { data } = await supabase.from("schedule")
-        .select("*, subjects(nom, code)")
-        .eq("filiere", me?.filiere || "")
-        .order("jour").order("heure_debut");
-      setItems(data || []);
+      if (role === "professor") {
+        const { data, error } = await supabase.from("schedule")
+          .select("*, subjects!inner(nom, code, professor_id)")
+          .eq("subjects.professor_id", profileId)
+          .order("jour").order("heure_debut");
+        if (error) console.error("Error fetching professor schedule:", error);
+        setItems(data || []);
+      } else {
+        const { data: me } = await supabase.from("profiles").select("filiere").eq("id", profileId).maybeSingle();
+        const { data } = await supabase.from("schedule")
+          .select("*, subjects(nom, code)")
+          .eq("filiere", me?.filiere || "")
+          .order("jour").order("heure_debut");
+        setItems(data || []);
+      }
       setLoading(false);
     })();
-  }, [profileId]);
+  }, [profileId, role]);
 
   const byDay = useMemo(() => {
     const m: Record<number, any[]> = {};

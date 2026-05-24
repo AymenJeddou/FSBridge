@@ -19,6 +19,8 @@ import Assistant from "./pages/Assistant";
 import Admin from "./pages/Admin";
 import Actualites from "./pages/Actualites";
 import NotFound from "./pages/NotFound";
+import MesMatieres from "./pages/MesMatieres";
+import SaisieNotes from "./pages/SaisieNotes";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +44,8 @@ const App = () => (
             <Route path="/profil" element={<Shell><Profil /></Shell>} />
             <Route path="/professeurs" element={<Shell><Professeurs /></Shell>} />
             <Route path="/emploi-du-temps" element={<Shell><EmploiDuTemps /></Shell>} />
+            <Route path="/mes-matieres" element={<Shell><MesMatieres /></Shell>} />
+            <Route path="/saisie-notes" element={<Shell><SaisieNotes /></Shell>} />
             <Route path="/documents" element={<Shell><Documents /></Shell>} />
             <Route path="/assistant" element={<Shell><Assistant /></Shell>} />
             <Route path="/admin" element={<RequireAuth role="admin"><AppShell><Admin /></AppShell></RequireAuth>} />

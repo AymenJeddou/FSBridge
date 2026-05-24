@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
-import { LayoutDashboard, GraduationCap, User, Users, Calendar, FileText, Sparkles, LogOut, ShieldCheck, Menu, X } from "lucide-react";
+import { LayoutDashboard, GraduationCap, User, Users, Calendar, FileText, Sparkles, LogOut, ShieldCheck, Menu, X, BookOpen } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -15,13 +15,27 @@ const studentLinks = [
   { to: "/profil", label: "Mon profil", icon: User },
 ];
 
+const adminLinks = [
+  { to: "/admin", label: "Administration", icon: ShieldCheck },
+  { to: "/profil", label: "Mon profil", icon: User },
+];
+
+const professorLinks = [
+  { to: "/emploi-du-temps", label: "Mon planning", icon: Calendar },
+  { to: "/mes-matieres", label: "Mes matières", icon: BookOpen },
+  { to: "/saisie-notes", label: "Saisie des notes", icon: GraduationCap },
+  { to: "/profil", label: "Mon profil", icon: User },
+];
+
 export const AppShell = ({ children }: { children: React.ReactNode }) => {
   const { role, signOut, user } = useAuth();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
-  const links = [...studentLinks];
-  if (role === "admin") links.push({ to: "/admin", label: "Admin", icon: ShieldCheck });
+  let links = studentLinks;
+  if (role === "admin") links = adminLinks;
+  else if (role === "professor") links = professorLinks;
+
 
   return (
     <div className="min-h-screen bg-background">

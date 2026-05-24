@@ -24,9 +24,9 @@ const TYPES: { id: any; label: string; desc: string }[] = [
 ];
 
 const STATUS_STYLES: Record<string, string> = {
-  en_attente: "bg-secondary",
-  approuve: "bg-accent",
-  refuse: "bg-destructive text-destructive-foreground border-destructive",
+  en_attente: "bg-[#fef3c7] text-[#92400e] border-[#f59e0b]",
+  approuve: "bg-[#d1fae5] text-[#065f46] border-[#10b981]",
+  refuse: "bg-[#fee2e2] text-[#991b1b] border-[#ef4444]",
 };
 const STATUS_LABEL: Record<string, string> = {
   en_attente: "En attente",
@@ -119,9 +119,9 @@ const Documents = () => {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <span className={`retro-tag ${STATUS_STYLES[r.statut]}`}>{STATUS_LABEL[r.statut]}</span>
-                  {r.pdf_url && r.statut === "approuve" && (
+                  {r.pdf_url && (
                     <a href={r.pdf_url} target="_blank" rel="noreferrer" className="text-xs font-semibold underline underline-offset-4 flex items-center gap-1">
-                      <Download size={12} /> Télécharger
+                      <Download size={12} /> {r.statut === "en_attente" ? "Imprimer le brouillon" : "Télécharger"}
                     </a>
                   )}
                 </div>

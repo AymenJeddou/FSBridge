@@ -4,97 +4,58 @@ import type { Database } from "./types";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const FORCE_MOCK = import.meta.env.VITE_FORCE_MOCK === "true";
 
-const HAS_SUPABASE_CONFIG = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
+const HAS_SUPABASE_CONFIG = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY) && !FORCE_MOCK;
 const MOCK_DB_KEY = "eduport-mock-db";
 const MOCK_SESSION_KEY = "eduport-mock-session";
 
+
 const defaultMockDb = () => ({
   profiles: [
-    {
-      id: "demo-profile",
-      user_id: "demo-user",
-      prenom: "Nour",
-      nom: "Ben Ali",
-      email: "demo@eduport.tn",
-      filiere: "GL",
-      niveau: "L3",
-      cin: "00000000",
-      telephone: "+216 00 000 000",
-      bio: "Mode demo local",
-      date_naissance: "2002-04-20",
-    },
-    {
-      id: "demo-prof-1",
-      user_id: "demo-prof-1",
-      prenom: "Amina",
-      nom: "Trabelsi",
-      email: "amina.trabelsi@eduport.tn",
-      filiere: "GL",
-      niveau: "Professeur",
-      bureau: "B12",
-      subjects: [{ nom: "Algorithmique", code: "ALG301" }],
-    },
-    {
-      id: "demo-prof-2",
-      user_id: "demo-prof-2",
-      prenom: "Youssef",
-      nom: "Haddad",
-      email: "youssef.haddad@eduport.tn",
-      filiere: "GL",
-      niveau: "Professeur",
-      bureau: "C04",
-      subjects: [{ nom: "Reseaux", code: "RNV302" }],
-    },
-    {
-      id: "demo-admin",
-      user_id: "demo-admin",
-      prenom: "Sara",
-      nom: "Mansouri",
-      email: "sara.mansouri@eduport.tn",
-      filiere: "GL",
-      niveau: "Admin",
-    },
+    { id: "demo-profile", user_id: "demo-user", prenom: "Nour", nom: "Ben Ali", email: "demo@eduport.tn", filiere: "GL", niveau: "L3", cin: "00000000", telephone: "+216 00 000 000", bio: "Mode demo local", date_naissance: "2002-04-20" },
+    { id: "demo-student-2", user_id: "demo-student-2", prenom: "Karim", nom: "Mansouri", email: "karim.mansouri@eduport.tn", filiere: "GL", niveau: "L2", cin: "11111111", telephone: "+216 11 111 111", bio: "" },
+    { id: "demo-student-3", user_id: "demo-student-3", prenom: "Fatma", nom: "Karray", email: "fatma.karray@eduport.tn", filiere: "RT", niveau: "L3", cin: "22222222", telephone: "+216 22 222 222", bio: "" },
+    { id: "demo-student-4", user_id: "demo-student-4", prenom: "Ahmed", nom: "Belhaj", email: "ahmed.belhaj@eduport.tn", filiere: "GL", niveau: "L1", cin: "33333333", telephone: "+216 33 333 333", bio: "" },
+    { id: "demo-student-5", user_id: "demo-student-5", prenom: "Leila", nom: "Jaziri", email: "leila.jaziri@eduport.tn", filiere: "RT", niveau: "L2", cin: "44444444", telephone: "+216 44 444 444", bio: "" },
+    { id: "demo-prof-1", user_id: "demo-prof-1", prenom: "Amina", nom: "Trabelsi", email: "amina.trabelsi@eduport.tn", filiere: "GL", niveau: "Professeur", bureau: "B12" },
+    { id: "demo-prof-2", user_id: "demo-prof-2", prenom: "Youssef", nom: "Haddad", email: "youssef.haddad@eduport.tn", filiere: "RT", niveau: "Professeur", bureau: "C04" },
+    { id: "demo-admin", user_id: "demo-admin", prenom: "Sara", nom: "Mansouri", email: "sara.mansouri@eduport.tn", filiere: "GL", niveau: "Admin" },
   ],
   user_roles: [
     { user_id: "demo-user", role: "student" },
+    { user_id: "demo-student-2", role: "student" },
+    { user_id: "demo-student-3", role: "student" },
+    { user_id: "demo-student-4", role: "student" },
+    { user_id: "demo-student-5", role: "student" },
     { user_id: "demo-prof-1", role: "professor" },
     { user_id: "demo-prof-2", role: "professor" },
     { user_id: "demo-admin", role: "admin" },
   ],
+  subjects: [
+    { id: "alg-301", nom: "Algorithmique", code: "ALG301", coefficient: 3, semestre: "S5", filiere: "GL", professor_id: "demo-prof-1", professor: { id: "demo-prof-1", prenom: "Amina", nom: "Trabelsi" } },
+    { id: "bdd-302", nom: "Bases de données", code: "BDD302", coefficient: 2, semestre: "S5", filiere: "GL", professor_id: "demo-prof-1", professor: { id: "demo-prof-1", prenom: "Amina", nom: "Trabelsi" } },
+    { id: "rnv-303", nom: "Réseaux", code: "RNV303", coefficient: 2, semestre: "S5", filiere: "RT", professor_id: "demo-prof-2", professor: { id: "demo-prof-2", prenom: "Youssef", nom: "Haddad" } },
+    { id: "math-201", nom: "Mathématiques", code: "MATH201", coefficient: 3, semestre: "S4", filiere: "GL", professor_id: null, professor: null },
+    { id: "sys-401", nom: "Systèmes d'exploitation", code: "SYS401", coefficient: 2, semestre: "S5", filiere: "RT", professor_id: "demo-prof-2", professor: { id: "demo-prof-2", prenom: "Youssef", nom: "Haddad" } },
+  ],
   grades: [
-    {
-      id: "grade-1",
-      student_id: "demo-profile",
-      note: 17.5,
-      poids: 1,
-      type: "DS",
-      date_evaluation: "2026-03-10",
-      subjects: { id: "alg-301", nom: "Algorithmique", code: "ALG301", coefficient: 3, semestre: "S5", filiere: "GL" },
-    },
-    {
-      id: "grade-2",
-      student_id: "demo-profile",
-      note: 14.8,
-      poids: 1,
-      type: "TP",
-      date_evaluation: "2026-03-15",
-      subjects: { id: "bdd-302", nom: "Bases de donnees", code: "BDD302", coefficient: 2, semestre: "S5", filiere: "GL" },
-    },
-    {
-      id: "grade-3",
-      student_id: "demo-profile",
-      note: 13.2,
-      poids: 1,
-      type: "Examen",
-      date_evaluation: "2026-03-22",
-      subjects: { id: "rnv-303", nom: "Reseaux", code: "RNV303", coefficient: 2, semestre: "S5", filiere: "GL" },
-    },
+    { id: "grade-1", student_id: "demo-profile", note: 17.5, poids: 1, type: "DS", date_evaluation: "2026-03-10", subjects: { id: "alg-301", nom: "Algorithmique", code: "ALG301", coefficient: 3, semestre: "S5", filiere: "GL" } },
+    { id: "grade-2", student_id: "demo-profile", note: 14.8, poids: 1, type: "TP", date_evaluation: "2026-03-15", subjects: { id: "bdd-302", nom: "Bases de données", code: "BDD302", coefficient: 2, semestre: "S5", filiere: "GL" } },
+    { id: "grade-3", student_id: "demo-profile", note: 13.2, poids: 1, type: "Examen", date_evaluation: "2026-03-22", subjects: { id: "rnv-303", nom: "Réseaux", code: "RNV303", coefficient: 2, semestre: "S5", filiere: "GL" } },
+    { id: "grade-4", student_id: "demo-student-2", note: 15.5, poids: 1, type: "DS", date_evaluation: "2026-03-10", subjects: { id: "alg-301", nom: "Algorithmique", code: "ALG301", coefficient: 3, semestre: "S5", filiere: "GL" } },
+    { id: "grade-5", student_id: "demo-student-2", note: 12.0, poids: 1, type: "Examen", date_evaluation: "2026-03-20", subjects: { id: "bdd-302", nom: "Bases de données", code: "BDD302", coefficient: 2, semestre: "S5", filiere: "GL" } },
+    { id: "grade-6", student_id: "demo-student-3", note: 18.0, poids: 1, type: "DS", date_evaluation: "2026-03-15", subjects: { id: "rnv-303", nom: "Réseaux", code: "RNV303", coefficient: 2, semestre: "S5", filiere: "RT" } },
+    { id: "grade-7", student_id: "demo-student-3", note: 16.5, poids: 1, type: "TP", date_evaluation: "2026-03-18", subjects: { id: "sys-401", nom: "Systèmes d'exploitation", code: "SYS401", coefficient: 2, semestre: "S5", filiere: "RT" } },
+    { id: "grade-8", student_id: "demo-student-4", note: 9.5, poids: 1, type: "DS", date_evaluation: "2026-03-10", subjects: { id: "math-201", nom: "Mathématiques", code: "MATH201", coefficient: 3, semestre: "S4", filiere: "GL" } },
+    { id: "grade-9", student_id: "demo-student-5", note: 14.0, poids: 1, type: "Examen", date_evaluation: "2026-03-22", subjects: { id: "rnv-303", nom: "Réseaux", code: "RNV303", coefficient: 2, semestre: "S5", filiere: "RT" } },
   ],
   schedule: [
-    { id: "sched-1", filiere: "GL", jour: 1, heure_debut: "08:00:00", heure_fin: "10:00:00", type_seance: "CM", salle: "A101", subjects: { nom: "Algorithmique", code: "ALG301" } },
-    { id: "sched-2", filiere: "GL", jour: 1, heure_debut: "10:30:00", heure_fin: "12:30:00", type_seance: "TD", salle: "B204", subjects: { nom: "Bases de donnees", code: "BDD302" } },
-    { id: "sched-3", filiere: "GL", jour: 3, heure_debut: "14:00:00", heure_fin: "16:00:00", type_seance: "TP", salle: "Lab 2", subjects: { nom: "Reseaux", code: "RNV303" } },
+    { id: "sched-1", filiere: "GL", jour: 1, heure_debut: "08:00:00", heure_fin: "10:00:00", type_seance: "CM", salle: "A101", subject_id: "alg-301", subjects: { nom: "Algorithmique", code: "ALG301" } },
+    { id: "sched-2", filiere: "GL", jour: 1, heure_debut: "10:30:00", heure_fin: "12:30:00", type_seance: "TD", salle: "B204", subject_id: "bdd-302", subjects: { nom: "Bases de données", code: "BDD302" } },
+    { id: "sched-3", filiere: "GL", jour: 3, heure_debut: "14:00:00", heure_fin: "16:00:00", type_seance: "TP", salle: "Lab 2", subject_id: "rnv-303", subjects: { nom: "Réseaux", code: "RNV303" } },
+    { id: "sched-4", filiere: "RT", jour: 2, heure_debut: "08:00:00", heure_fin: "10:00:00", type_seance: "CM", salle: "C201", subject_id: "rnv-303", subjects: { nom: "Réseaux", code: "RNV303" } },
+    { id: "sched-5", filiere: "RT", jour: 4, heure_debut: "10:30:00", heure_fin: "12:30:00", type_seance: "TP", salle: "Lab 3", subject_id: "sys-401", subjects: { nom: "Systèmes d'exploitation", code: "SYS401" } },
   ],
   document_requests: [
     {
@@ -131,19 +92,14 @@ const saveMockDb = (db: any) => {
   }
 };
 
-const demoSession = () => ({
-  access_token: "demo-access-token",
+const makeSession = (userId: string, email: string) => ({
+  access_token: `demo-token-${userId}`,
   token_type: "bearer",
   expires_in: 3600,
-  refresh_token: "demo-refresh-token",
-  user: {
-    id: "demo-user",
-    email: "demo@eduport.tn",
-    role: "authenticated",
-    app_metadata: {},
-    user_metadata: { prenom: "Nour", nom: "Ben Ali" },
-  },
+  refresh_token: `demo-refresh-${userId}`,
+  user: { id: userId, email, role: "authenticated", app_metadata: {}, user_metadata: {} },
 });
+
 
 const loadMockSession = () => {
   if (typeof window === "undefined") return null;
@@ -307,8 +263,19 @@ const createMockSupabase = () => {
       };
     },
     getSession: async () => ({ data: { session: sessionState.current }, error: null }),
-    signInWithPassword: async () => ({ data: { session: setSession(demoSession()) }, error: null }),
-    signUp: async () => ({ data: { session: setSession(demoSession()) }, error: null }),
+    signInWithPassword: async ({ email }: { email: string; password: string }) => {
+      const db = loadMockDb();
+      const profile = (db.profiles as any[]).find((p: any) => p.email === email);
+      if (!profile) return { data: { session: null }, error: { message: "Email ou mot de passe incorrect." } };
+      return { data: { session: setSession(makeSession(profile.user_id, profile.email)) }, error: null };
+    },
+    signUp: async ({ email }: { email: string; password: string }) => {
+      const db = loadMockDb();
+      const profile = (db.profiles as any[]).find((p: any) => p.email === email);
+      const userId = profile?.user_id ?? "demo-user";
+      const userEmail = profile?.email ?? email;
+      return { data: { session: setSession(makeSession(userId, userEmail)) }, error: null };
+    },
     signOut: async () => {
       setSession(null);
       return { error: null };
@@ -324,14 +291,22 @@ const createMockSupabase = () => {
           const db = loadMockDb();
           const request = (db.document_requests as any[]).find((row) => row.id === options.body.requestId);
           if (request) {
-            Object.assign(request, {
-              statut: "approuve",
-              decision_ia: "Document genere en mode demo",
-              pdf_url: "about:blank",
-              reviewed_at: new Date().toISOString(),
+            Object.assign(request, { 
+              statut: "en_attente", 
+              decision_ia: "PDF généré (en attente d'approbation manuelle)", 
+              pdf_url: "about:blank" 
             });
             saveMockDb(db);
           }
+        }
+        if (name === "admin-create-user" && options?.body) {
+          const { email, role, prenom, nom, filiere, niveau, bureau } = options.body;
+          const db = loadMockDb();
+          const newId = `mock-user-${Date.now()}`;
+          (db.profiles as any[]).push({ id: newId, user_id: newId, prenom, nom, email, filiere, niveau: role === "professor" ? "Professeur" : niveau, bureau: bureau || null, cin: null, telephone: null, bio: null, date_naissance: null, created_at: new Date().toISOString() });
+          (db.user_roles as any[]).push({ user_id: newId, role });
+          saveMockDb(db);
+          return { data: { ok: true, userId: newId }, error: null };
         }
         return { data: { ok: true }, error: null };
       },
