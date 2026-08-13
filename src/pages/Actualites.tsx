@@ -76,6 +76,10 @@ const excerpt = (text: string, max = 150) => {
   return stripped.length > max ? stripped.slice(0, max) + "…" : stripped;
 };
 
+// Escape HTML so article text can't inject markup before we add <strong>
+const escapeHtml = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
 // Minimal markdown renderer (bold + headings + lists)
 const renderMarkdown = (text: string) => {
   const lines = text.split("\n");
@@ -95,7 +99,7 @@ const renderMarkdown = (text: string) => {
       );
     }
     if (line.startsWith("- ")) {
-      const content = line.slice(2).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      const content = escapeHtml(line.slice(2)).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
       return (
         <li
           key={i}
@@ -105,7 +109,7 @@ const renderMarkdown = (text: string) => {
       );
     }
     if (line.trim() === "") return <div key={i} className="h-2" />;
-    const html = line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    const html = escapeHtml(line).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     return (
       <p
         key={i}
