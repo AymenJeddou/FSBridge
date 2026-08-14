@@ -26,6 +26,7 @@ dist-ssr
 # Env files
 .env
 .env.*
+!.env.example
 
 # Supabase CLI local state
 supabase/.temp/
