@@ -41,8 +41,8 @@ To get a local copy up and running, follow these simple steps.
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/mon-portail-tudiant.git
-   cd mon-portail-tudiant
+   git clone https://github.com/AymenJeddou/FSBridge.git
+   cd FSBridge
    ```
 
 2. Install dependencies:
@@ -53,8 +53,12 @@ To get a local copy up and running, follow these simple steps.
    ```
 
 3. Set up environment variables:
-   - Create a `.env.local` file in the root directory.
-   - Add your Supabase and Gemini API keys (you will need `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `VITE_GEMINI_API_KEY` or equivalent backend keys).
+   ```bash
+   cp .env.example .env.local
+   ```
+   - Fill in `VITE_SUPABASE_URL` and your public anon key (`VITE_SUPABASE_PUBLISHABLE_KEY` / `VITE_SUPABASE_ANON_KEY`).
+   - The Gemini key lives in the Supabase Edge Function secrets, never in the frontend.
+   - No Supabase project? Set `VITE_FORCE_MOCK=true` to run on mock data.
 
 4. Start the development server:
    ```bash
@@ -63,7 +67,7 @@ To get a local copy up and running, follow these simple steps.
    bun dev
    ```
 
-5. Open your browser and navigate to the local URL provided by Vite (usually `http://localhost:8080` or `http://localhost:5173`).
+5. Open your browser and navigate to the local URL provided by Vite (`http://localhost:8080`).
 
 ## 🔮 Future Roadmap
 
