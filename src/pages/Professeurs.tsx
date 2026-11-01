@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, Mail, MapPin } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
-const containerVars = {
+const containerVars: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
 };
-const itemVars = {
+const itemVars: Variants = {
   hidden: { opacity: 0, y: 15 },
   visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
 };

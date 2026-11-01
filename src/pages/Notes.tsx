@@ -7,13 +7,13 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { Loader2, TrendingUp } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 
-const containerVars = {
+const containerVars: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
 };
-const itemVars = {
+const itemVars: Variants = {
   hidden: { opacity: 0, y: 15 },
   visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
 };

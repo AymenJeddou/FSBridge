@@ -6,13 +6,13 @@ import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { Squiggle, StarSpark, ScribbleArrow } from "@/components/Doodles";
 import { Link } from "react-router-dom";
 import { Calendar, GraduationCap, Sparkles, FileText, ArrowUpRight, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
-const containerVars = {
+const containerVars: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
 };
-const itemVars = {
+const itemVars: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 12 } }
 };
