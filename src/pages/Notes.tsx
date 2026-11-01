@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { moyenneMatiere, mention, fmt, moyenneGenerale } from "@/lib/grading";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar } from "recharts";
@@ -17,9 +18,13 @@ const itemVars = {
   visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
 };
 
+type Subject = Pick<Tables<"subjects">, "id" | "nom" | "code" | "coefficient" | "semestre">;
+type Grade = Tables<"grades"> & { subjects: Subject | null };
+type SubjectNotes = Subject & { notes: Grade[]; moyenne: number };
+
 const Notes = () => {
   const { profileId } = useAuth();
-  const [grades, setGrades] = useState<any[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
   const [loading, setLoading] = useState(true);
   const [openSubj, setOpenSubj] = useState<string | null>(null);
 
@@ -35,25 +40,25 @@ const Notes = () => {
   }, [profileId]);
 
   const bySubj = useMemo(() => {
-    const m: Record<string, any> = {};
+    const m: Record<string, Subject & { notes: Grade[] }> = {};
     grades.forEach((g) => {
       const id = g.subjects?.id; if (!id) return;
       if (!m[id]) m[id] = { ...g.subjects, notes: [] };
       m[id].notes.push(g);
     });
-    return Object.values(m).map((s: any) => ({ ...s, moyenne: moyenneMatiere(s.notes) }));
+    return Object.values(m).map((s): SubjectNotes => ({ ...s, moyenne: moyenneMatiere(s.notes) }));
   }, [grades]);
 
   const bySemestre = useMemo(() => {
-    const m: Record<string, any[]> = {};
-    bySubj.forEach((s: any) => {
+    const m: Record<string, SubjectNotes[]> = {};
+    bySubj.forEach((s) => {
       m[s.semestre] = m[s.semestre] || [];
       m[s.semestre].push(s);
     });
     return m;
   }, [bySubj]);
 
-  const moyG = moyenneGenerale(bySubj.map((s: any) => ({ moyenne: s.moyenne, coefficient: Number(s.coefficient) })));
+  const moyG = moyenneGenerale(bySubj.map((s) => ({ moyenne: s.moyenne, coefficient: Number(s.coefficient) })));
 
   // Evolution per evaluation across all subjects
   const evolution = useMemo(() => {
@@ -128,7 +133,7 @@ const Notes = () => {
           <h2 className="font-display text-2xl mb-4">Moyennes par matière</h2>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={bySubj.map((s: any) => ({ nom: s.nom.split(" ").slice(0, 2).join(" "), moyenne: Number(s.moyenne.toFixed(2)) }))} margin={{ top: 10, right: 20, bottom: 0, left: -10 }}>
+              <BarChart data={bySubj.map((s) => ({ nom: s.nom.split(" ").slice(0, 2).join(" "), moyenne: Number(s.moyenne.toFixed(2)) }))} margin={{ top: 10, right: 20, bottom: 0, left: -10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--soft-border))" />
                 <XAxis dataKey="nom" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                 <YAxis domain={[0, 20]} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
@@ -141,16 +146,16 @@ const Notes = () => {
       )}
 
       {/* By semester */}
-      {Object.entries(bySemestre).sort().map(([sem, subs]: any) => (
+      {Object.entries(bySemestre).sort().map(([sem, subs]) => (
         <motion.div key={sem} variants={itemVars} className="space-y-3">
           <h2 className="font-display text-2xl flex items-center gap-3">
             Semestre {sem.replace("S", "")}
             <span className="text-sm text-muted-foreground font-sans font-normal">
-              moyenne {fmt(moyenneGenerale(subs.map((s: any) => ({ moyenne: s.moyenne, coefficient: Number(s.coefficient) }))))}/20
+              moyenne {fmt(moyenneGenerale(subs.map((s) => ({ moyenne: s.moyenne, coefficient: Number(s.coefficient) }))))}/20
             </span>
           </h2>
           <div className="grid gap-3">
-            {subs.map((s: any) => (
+            {subs.map((s) => (
               <div key={s.id} className="retro-card overflow-hidden">
                 <button onClick={() => setOpenSubj(openSubj === s.id ? null : s.id)} className="w-full p-5 flex items-center justify-between gap-4 text-left">
                   <div className="flex-1 min-w-0">
@@ -167,7 +172,7 @@ const Notes = () => {
                     exit={{ height: 0, opacity: 0 }}
                     className="border-t-2 border-foreground p-5 bg-secondary/40 space-y-2 overflow-hidden"
                   >
-                    {s.notes.map((n: any) => (
+                    {s.notes.map((n) => (
                       <div key={n.id} className="flex items-center justify-between text-sm">
                         <div>
                           <span className="retro-tag mr-2 text-[10px]">{n.type}</span>
