@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Enums, Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Download, FileText, Loader2, Sparkles, Plus, X } from "lucide-react";
@@ -16,19 +17,19 @@ const itemVars: Variants = {
   visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
 };
 
-const TYPES: { id: any; label: string; desc: string }[] = [
+const TYPES: { id: Enums<"doc_type">; label: string; desc: string }[] = [
   { id: "attestation_inscription", label: "Attestation d'inscription", desc: "Prouve que vous êtes inscrit pour l'année universitaire en cours." },
   { id: "releve_notes", label: "Relevé de notes", desc: "Détail de vos moyennes par matière avec mention." },
   { id: "attestation_presence", label: "Attestation de présence", desc: "Confirmation de votre assiduité aux cours." },
   { id: "convention_stage", label: "Convention de stage", desc: "Document tripartite pour effectuer un stage." },
 ];
 
-const STATUS_STYLES: Record<string, string> = {
+const STATUS_STYLES: Record<Enums<"doc_status">, string> = {
   en_attente: "bg-[#fef3c7] text-[#92400e] border-[#f59e0b]",
   approuve: "bg-[#d1fae5] text-[#065f46] border-[#10b981]",
   refuse: "bg-[#fee2e2] text-[#991b1b] border-[#ef4444]",
 };
-const STATUS_LABEL: Record<string, string> = {
+const STATUS_LABEL: Record<Enums<"doc_status">, string> = {
   en_attente: "En attente",
   approuve: "Approuvé",
   refuse: "Refusé",
@@ -37,10 +38,10 @@ const STATUS_LABEL: Record<string, string> = {
 const Documents = () => {
   const { profileId } = useAuth();
   const { toast } = useToast();
-  const [requests, setRequests] = useState<any[]>([]);
+  const [requests, setRequests] = useState<Tables<"document_requests">[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState<string>("attestation_inscription");
+  const [type, setType] = useState<Enums<"doc_type">>("attestation_inscription");
   const [motif, setMotif] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -57,7 +58,7 @@ const Documents = () => {
     setSubmitting(true);
     try {
       const { data, error } = await supabase.from("document_requests")
-        .insert({ student_id: profileId, type: type as any, motif })
+        .insert({ student_id: profileId, type, motif })
         .select().single();
       if (error) throw error;
       toast({ title: "Demande envoyée", description: "L'agent IA traite votre demande..." });
@@ -66,8 +67,8 @@ const Documents = () => {
       const { error: fnError } = await supabase.functions.invoke("document-agent", { body: { requestId: data.id } });
       if (fnError) console.error(fnError);
       await load();
-    } catch (e: any) {
-      toast({ title: "Erreur", description: e.message, variant: "destructive" });
+    } catch (e) {
+      toast({ title: "Erreur", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
     } finally { setSubmitting(false); }
   };
 
