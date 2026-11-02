@@ -9,7 +9,7 @@ export function mention(moy: number): { label: string; color: string } {
 
 export type GradeRow = { type: string; note: number; poids: number; date_evaluation: string };
 
-export function moyenneMatiere(grades: GradeRow[]): number {
+export function moyenneMatiere(grades: Pick<GradeRow, "note" | "poids">[]): number {
   if (!grades.length) return 0;
   const sumW = grades.reduce((s, g) => s + Number(g.poids), 0);
   if (sumW === 0) return 0;
