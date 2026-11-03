@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { errorMessage } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import type { Enums, Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, GraduationCap, Search, Plus, Trash2, Pencil, X, ChevronRight, Check, ArrowLeft, Calendar, FileText } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,14 +16,14 @@ export default function SaisieNotes() {
   const [loading, setLoading] = useState(true);
   
   // DB loaded states
-  const [subjects, setSubjects] = useState<any[]>([]);
-  const [students, setStudents] = useState<any[]>([]);
-  const [grades, setGrades] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<Tables<"subjects">[]>([]);
+  const [students, setStudents] = useState<Tables<"profiles">[]>([]);
+  const [grades, setGrades] = useState<Tables<"grades">[]>([]);
   const [loadingGrades, setLoadingGrades] = useState(false);
 
   // Active selections
-  const [selectedSubj, setSelectedSubj] = useState<any | null>(null);
-  const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
+  const [selectedSubj, setSelectedSubj] = useState<Tables<"subjects"> | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<Tables<"profiles"> | null>(null);
   const [searchStudent, setSearchStudent] = useState("");
 
   // Modal / Form state
@@ -34,7 +35,7 @@ export default function SaisieNotes() {
   const [form, setForm] = useState({
     note: "",
     poids: "1",
-    type: "DS",
+    type: "DS" as Enums<"grade_type">,
     date_evaluation: new Date().toISOString().slice(0, 10),
     commentaire: ""
   });
@@ -99,7 +100,7 @@ export default function SaisieNotes() {
     }
   };
 
-  const handleSelectStudent = (student: any) => {
+  const handleSelectStudent = (student: Tables<"profiles">) => {
     setSelectedStudent(student);
     if (student && selectedSubj) {
       loadGradesForStudent(student.id, selectedSubj.id);
@@ -121,7 +122,7 @@ export default function SaisieNotes() {
     setFormOpen(true);
   };
 
-  const handleOpenEditForm = (g: any) => {
+  const handleOpenEditForm = (g: Tables<"grades">) => {
     setForm({
       note: String(g.note),
       poids: String(g.poids || 1),
@@ -172,7 +173,7 @@ export default function SaisieNotes() {
           .update({
             note: noteVal,
             poids: Number(form.poids),
-            type: form.type as any,
+            type: form.type,
             date_evaluation: form.date_evaluation,
             commentaire: form.commentaire || null
           })
@@ -189,7 +190,7 @@ export default function SaisieNotes() {
             subject_id: selectedSubj.id,
             note: noteVal,
             poids: Number(form.poids),
-            type: form.type as any,
+            type: form.type,
             date_evaluation: form.date_evaluation,
             commentaire: form.commentaire || null
           });
@@ -487,7 +488,7 @@ export default function SaisieNotes() {
                   <label className="block text-xs uppercase tracking-wider font-semibold mb-1">Type *</label>
                   <select 
                     value={form.type} 
-                    onChange={(e) => setForm({ ...form, type: e.target.value })} 
+                    onChange={(e) => setForm({ ...form, type: e.target.value as Enums<"grade_type"> })} 
                     className="w-full px-3 py-2 rounded-xl border-2 border-foreground bg-background focus:outline-none text-xs font-semibold cursor-pointer"
                   >
                     {GRADE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
