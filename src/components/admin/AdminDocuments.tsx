@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { errorMessage } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -31,8 +32,8 @@ export default function AdminDocuments() {
       });
       if (fnError) throw fnError;
       toast({ title: statut === "approuve" ? "Demande approuvée (signée par le Doyen)" : "Demande refusée" });
-    } catch (e: any) {
-      toast({ title: "Erreur", description: e.message, variant: "destructive" });
+    } catch (e) {
+      toast({ title: "Erreur", description: errorMessage(e), variant: "destructive" });
     } finally {
       load();
     }

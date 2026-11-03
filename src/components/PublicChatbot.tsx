@@ -70,7 +70,7 @@ export const PublicChatbot = () => {
           } catch { buf = line + "\n" + buf; break; }
         }
       }
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
       setMessages((m) => [...m, { role: "assistant", content: "Désolé, une erreur est survenue." }]);
     } finally {

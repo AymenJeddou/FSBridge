@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { errorMessage } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,9 +28,9 @@ const Auth = () => {
       }
       // Navigation is handled by the useEffect above once user state updates
       return {};
-    } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
-      return { error: err.message };
+    } catch (err) {
+      toast({ title: "Erreur", description: errorMessage(err), variant: "destructive" });
+      return { error: errorMessage(err) };
     }
   };
 
@@ -74,9 +75,9 @@ const Auth = () => {
       }
 
       return {};
-    } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
-      return { error: err.message };
+    } catch (err) {
+      toast({ title: "Erreur", description: errorMessage(err), variant: "destructive" });
+      return { error: errorMessage(err) };
     }
   };
 

@@ -649,7 +649,7 @@ const Actualites = () => {
       if (error) throw error;
       setArticles(data || []);
       setVisibleCount(3);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Fetch articles error:", err);
       setError("Impossible de charger les articles. Veuillez réessayer.");
     } finally {

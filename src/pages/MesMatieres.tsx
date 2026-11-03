@@ -65,7 +65,7 @@ export default function MesMatieres() {
       setSubjects(subjectsList);
       setStudents(studentProfiles);
       setGrades(gradesData || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error loading professor subjects:", err);
     } finally {
       setLoading(false);

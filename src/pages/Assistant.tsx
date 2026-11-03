@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { errorMessage } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, Send, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -77,8 +78,8 @@ const Assistant = () => {
           } catch { buf = line + "\n" + buf; break; }
         }
       }
-    } catch (e: any) {
-      toast({ title: "Erreur", description: e.message, variant: "destructive" });
+    } catch (e) {
+      toast({ title: "Erreur", description: errorMessage(e), variant: "destructive" });
     } finally { setLoading(false); }
   };
 

@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { errorMessage } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, GraduationCap, Search, Plus, Trash2, Pencil, X, ChevronRight, Check, ArrowLeft, Calendar, FileText } from "lucide-react";
@@ -68,8 +69,8 @@ export default function SaisieNotes() {
         p => p.filiere && p.niveau !== "Professeur" && p.email !== "admin@eduport.tn"
       );
       setStudents(studentProfiles);
-    } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erreur", description: errorMessage(err), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -91,8 +92,8 @@ export default function SaisieNotes() {
       
       if (error) throw error;
       setGrades(data || []);
-    } catch (err: any) {
-      toast({ title: "Erreur de chargement des notes", description: err.message, variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erreur de chargement des notes", description: errorMessage(err), variant: "destructive" });
     } finally {
       setLoadingGrades(false);
     }
@@ -147,8 +148,8 @@ export default function SaisieNotes() {
       if (selectedStudent && selectedSubj) {
         loadGradesForStudent(selectedStudent.id, selectedSubj.id);
       }
-    } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erreur", description: errorMessage(err), variant: "destructive" });
     }
   };
 
@@ -199,8 +200,8 @@ export default function SaisieNotes() {
 
       setFormOpen(false);
       loadGradesForStudent(selectedStudent.id, selectedSubj.id);
-    } catch (err: any) {
-      toast({ title: "Erreur d'enregistrement", description: err.message, variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erreur d'enregistrement", description: errorMessage(err), variant: "destructive" });
     } finally {
       setSavingGrade(false);
     }

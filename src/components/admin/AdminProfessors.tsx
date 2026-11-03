@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { errorMessage } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Mail, MapPin, BookOpen, Trash2, Pencil, X, Search, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -42,8 +43,8 @@ export default function AdminProfessors() {
       });
       setFilieres(Array.from(fls));
       setProfs(enriched);
-    } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erreur", description: errorMessage(err), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -62,8 +63,8 @@ export default function AdminProfessors() {
 
       toast({ title: "Professeur supprimé !" });
       load();
-    } catch (e: any) {
-      toast({ title: "Erreur", description: e.message, variant: "destructive" });
+    } catch (e) {
+      toast({ title: "Erreur", description: errorMessage(e), variant: "destructive" });
     }
   };
 
@@ -95,8 +96,8 @@ export default function AdminProfessors() {
       toast({ title: "Professeur mis à jour !" });
       setModal(null);
       load();
-    } catch (e: any) {
-      toast({ title: "Erreur", description: e.message, variant: "destructive" });
+    } catch (e) {
+      toast({ title: "Erreur", description: errorMessage(e), variant: "destructive" });
     } finally {
       setSaving(false);
     }

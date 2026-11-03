@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { errorMessage } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Search, ChevronDown, Trash2, Pencil, X } from "lucide-react";
 import { moyenneMatiere, moyenneGenerale, fmt } from "@/lib/grading";
@@ -64,8 +65,8 @@ export default function AdminStudents() {
 
       toast({ title: "Étudiant supprimé !" });
       load();
-    } catch (e: any) {
-      toast({ title: "Erreur", description: e.message, variant: "destructive" });
+    } catch (e) {
+      toast({ title: "Erreur", description: errorMessage(e), variant: "destructive" });
     }
   };
 
@@ -97,8 +98,8 @@ export default function AdminStudents() {
       toast({ title: "Étudiant mis à jour !" });
       setModal(null);
       load();
-    } catch (e: any) {
-      toast({ title: "Erreur", description: e.message, variant: "destructive" });
+    } catch (e) {
+      toast({ title: "Erreur", description: errorMessage(e), variant: "destructive" });
     } finally {
       setSaving(false);
     }

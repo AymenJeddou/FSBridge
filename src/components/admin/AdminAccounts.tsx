@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { errorMessage } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, UserPlus, CheckCircle, Search, ChevronDown, Pencil, Trash2, X, Users, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -61,8 +62,8 @@ export default function AdminAccounts() {
       });
 
       setAccounts(mapped);
-    } catch (err: any) {
-      toast({ title: "Erreur de chargement", description: err.message, variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erreur de chargement", description: errorMessage(err), variant: "destructive" });
     } finally {
       setLoadingList(false);
     }
@@ -103,8 +104,8 @@ export default function AdminAccounts() {
 
       toast({ title: "Compte supprimé", description: `Le compte de ${name} a été supprimé.` });
       loadAccounts();
-    } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erreur", description: errorMessage(err), variant: "destructive" });
       setLoadingList(false);
     }
   };
@@ -162,8 +163,8 @@ export default function AdminAccounts() {
       setView("list");
       loadAccounts();
       setTimeout(() => setSuccess(false), 4000);
-    } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erreur", description: errorMessage(err), variant: "destructive" });
     } finally { 
       setLoadingSubmit(false); 
     }
