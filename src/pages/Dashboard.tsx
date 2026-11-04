@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+import type { ComponentType } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { mention, moyenneMatiere, moyenneGenerale } from "@/lib/grading";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
@@ -17,11 +19,13 @@ const itemVars: Variants = {
   visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 12 } }
 };
 
+type QuickLink = { to: string; icon: ComponentType<{ size?: number; className?: string }>; label: string; sub: string };
+
 const Dashboard = () => {
   const { user, profileId } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
   const [moy, setMoy] = useState(0);
-  const [todayCourses, setTodayCourses] = useState<any[]>([]);
+  const [todayCourses, setTodayCourses] = useState<(Tables<"schedule"> & { subjects: { nom: string } | null })[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -34,14 +38,14 @@ const Dashboard = () => {
       .select("note,poids,type,date_evaluation, subjects(id,nom,coefficient)")
       .eq("student_id", profileId);
 
-    const bySubj: Record<string, any> = {};
-    (grades || []).forEach((g: any) => {
+    const bySubj: Record<string, { coefficient: number; notes: { note: number; poids: number; type: string; date_evaluation: string }[] }> = {};
+    (grades || []).forEach((g) => {
       const id = g.subjects?.id;
       if (!id) return;
       if (!bySubj[id]) bySubj[id] = { coefficient: g.subjects?.coefficient || 1, notes: [] };
       bySubj[id].notes.push({ note: Number(g.note), poids: Number(g.poids), type: g.type, date_evaluation: g.date_evaluation });
     });
-    const arr = Object.values(bySubj).map((s: any) => ({ moyenne: moyenneMatiere(s.notes), coefficient: Number(s.coefficient) }));
+    const arr = Object.values(bySubj).map((s) => ({ moyenne: moyenneMatiere(s.notes), coefficient: Number(s.coefficient) }));
     setMoy(moyenneGenerale(arr));
 
     if (p?.filiere) {
@@ -109,12 +113,14 @@ const Dashboard = () => {
 
       {/* Quick links */}
       <motion.div variants={itemVars} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
+        {(
+          [
           { to: "/notes", icon: GraduationCap, label: "Mes notes", sub: "Voir le détail" },
           { to: "/emploi-du-temps", icon: Calendar, label: "Emploi du temps", sub: "Cette semaine" },
           { to: "/documents", icon: FileText, label: "Documents", sub: "Demander un PDF" },
-          { to: "/professeurs", icon: ScribbleArrow as any, label: "Professeurs", sub: "Annuaire" },
-        ].map((l: any) => (
+          { to: "/professeurs", icon: ScribbleArrow, label: "Professeurs", sub: "Annuaire" },
+          ] as QuickLink[]
+        ).map((l) => (
           <Link key={l.to} to={l.to} className="retro-card retro-card-hover p-5">
             <l.icon size={20} className="mb-3" />
             <div className="font-display text-lg leading-tight">{l.label}</div>

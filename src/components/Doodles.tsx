@@ -1,6 +1,6 @@
 // Hand-drawn line-art SVGs in Retrofly spirit
-export const ScribbleArrow = ({ className = "" }: { className?: string }) => (
-  <svg viewBox="0 0 120 40" className={className} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+export const ScribbleArrow = ({ className = "", size }: { className?: string; size?: number }) => (
+  <svg viewBox="0 0 120 40" width={size} height={size} className={className} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
     <path d="M5 25 C 30 5, 60 5, 100 22" />
     <path d="M90 14 L 102 22 L 92 32" />
   </svg>
