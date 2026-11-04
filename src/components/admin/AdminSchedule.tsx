@@ -1,27 +1,30 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const FILIERES = ["GL", "RT", "IASIG", "MISI", "BI"];
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
 const TYPES = ["CM", "TD", "TP"];
+type Slot = Tables<"schedule"> & { subjects: { nom: string } | null };
+type SubjectOption = Pick<Tables<"subjects">, "id" | "nom" | "code" | "filiere">;
 const emptyForm = { filiere: "GL", jour: 1, heure_debut: "08:00", heure_fin: "10:00", type_seance: "CM", salle: "", subject_id: "" };
 
 export default function AdminSchedule() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [schedule, setSchedule] = useState<any[]>([]);
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const [schedule, setSchedule] = useState<Slot[]>([]);
+  const [subjects, setSubjects] = useState<SubjectOption[]>([]);
   const [filterFiliere, setFilterFiliere] = useState("GL");
   const [modal, setModal] = useState(false);
-  const [form, setForm] = useState<any>(emptyForm);
+  const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
     setLoading(true);
     const [{ data: sched }, { data: subs }] = await Promise.all([
-      supabase.from("schedule").select("*").order("jour").order("heure_debut"),
+      supabase.from("schedule").select("*, subjects(nom)").order("jour").order("heure_debut"),
       supabase.from("subjects").select("id,nom,code,filiere"),
     ]);
     setSchedule(sched || []);
@@ -31,7 +34,7 @@ export default function AdminSchedule() {
 
   useEffect(() => { load(); }, []);
 
-  const set = (k: string, v: any) => setForm((f: any) => ({ ...f, [k]: v }));
+  const set = <K extends keyof typeof emptyForm>(k: K, v: (typeof emptyForm)[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const filteredSubs = subjects.filter((s) => s.filiere === form.filiere);
 
@@ -63,7 +66,7 @@ export default function AdminSchedule() {
   };
 
   const displayed = schedule.filter((s) => s.filiere === filterFiliere);
-  const byDay: Record<number, any[]> = {};
+  const byDay: Record<number, Slot[]> = {};
   displayed.forEach((s) => { (byDay[s.jour] = byDay[s.jour] || []).push(s); });
 
   if (loading) return <div className="flex items-center justify-center min-h-[40vh]"><Loader2 className="animate-spin" /></div>;
@@ -133,7 +136,7 @@ export default function AdminSchedule() {
               </div>
               <div>
                 <label className="block text-xs uppercase tracking-wider font-semibold mb-1">Jour</label>
-                <select value={form.jour} onChange={(e) => set("jour", e.target.value)} className="w-full px-3 py-2 rounded-xl border-2 border-foreground bg-background focus:outline-none text-sm">
+                <select value={form.jour} onChange={(e) => set("jour", Number(e.target.value))} className="w-full px-3 py-2 rounded-xl border-2 border-foreground bg-background focus:outline-none text-sm">
                   {JOURS.map((j, i) => <option key={j} value={i + 1}>{j}</option>)}
                 </select>
               </div>
