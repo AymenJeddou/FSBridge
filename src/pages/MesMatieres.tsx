@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, BookOpen, GraduationCap, Users, Calendar, Award, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
@@ -17,9 +18,9 @@ const itemVars: Variants = {
 export default function MesMatieres() {
   const { profileId } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [subjects, setSubjects] = useState<any[]>([]);
-  const [students, setStudents] = useState<any[]>([]);
-  const [grades, setGrades] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<Tables<"subjects">[]>([]);
+  const [students, setStudents] = useState<Tables<"profiles">[]>([]);
+  const [grades, setGrades] = useState<Tables<"grades">[]>([]);
   const [expandedSubj, setExpandedSubj] = useState<string | null>(null);
 
   const loadData = async () => {
@@ -263,7 +264,7 @@ export default function MesMatieres() {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {subj.students.map((student: any) => {
+                                  {subj.students.map((student) => {
                                     const initiales = `${student.prenom?.[0] || ""}${student.nom?.[0] || ""}`.toUpperCase();
                                     return (
                                       <tr key={student.id} className="border-b border-soft-border/50 hover:bg-muted/20 transition-colors">
