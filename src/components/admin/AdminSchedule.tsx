@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { errorMessage } from "@/lib/utils";
 
 const FILIERES = ["GL", "RT", "IASIG", "MISI", "BI"];
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
@@ -42,9 +43,11 @@ export default function AdminSchedule() {
     if (!form.salle || !form.subject_id) {
       toast({ title: "Erreur", description: "Salle et matière sont requis.", variant: "destructive" }); return;
     }
+    if (form.heure_fin <= form.heure_debut) {
+      toast({ title: "Erreur", description: "L'heure de fin doit suivre l'heure de début.", variant: "destructive" }); return;
+    }
     setSaving(true);
-    const sub = subjects.find((s) => s.id === form.subject_id);
-    await supabase.from("schedule").insert({
+    const { error } = await supabase.from("schedule").insert({
       filiere: form.filiere,
       jour: Number(form.jour),
       heure_debut: `${form.heure_debut}:00`,
@@ -53,14 +56,20 @@ export default function AdminSchedule() {
       salle: form.salle,
       subject_id: form.subject_id,
     });
+    setSaving(false);
+    if (error) {
+      toast({ title: "Erreur", description: errorMessage(error), variant: "destructive" }); return;
+    }
     toast({ title: "Séance ajoutée" });
     setModal(false);
-    setSaving(false);
     load();
   };
 
   const del = async (id: string) => {
-    await supabase.from("schedule").delete().eq("id", id);
+    const { error } = await supabase.from("schedule").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erreur", description: errorMessage(error), variant: "destructive" }); return;
+    }
     toast({ title: "Séance supprimée" });
     load();
   };
