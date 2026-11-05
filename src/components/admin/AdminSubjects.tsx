@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Enums, Tables } from "@/integrations/supabase/types";
 import { Loader2, Plus, Trash2, X, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const FILIERES = ["GL", "RT", "IASIG", "MISI", "BI"];
 const SEMESTRES = ["S1", "S2", "S3", "S4", "S5", "S6"];
-const empty = { nom: "", code: "", coefficient: 2, semestre: "S5", filiere: "GL", professor_id: "" };
+type SubjectForm = { nom: string; code: string; coefficient: number | string; semestre: Enums<"semester">; filiere: string; professor_id: string };
+type Prof = Pick<Tables<"profiles">, "id" | "user_id" | "prenom" | "nom">;
+const empty: SubjectForm = { nom: "", code: "", coefficient: 2, semestre: "S5", filiere: "GL", professor_id: "" };
 
 export default function AdminSubjects() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [subjects, setSubjects] = useState<any[]>([]);
-  const [profs, setProfs] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<Tables<"subjects">[]>([]);
+  const [profs, setProfs] = useState<Prof[]>([]);
   const [modal, setModal] = useState<"add" | "edit" | null>(null);
-  const [form, setForm] = useState<any>(empty);
+  const [form, setForm] = useState<SubjectForm>(empty);
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -24,8 +27,8 @@ export default function AdminSubjects() {
       supabase.from("user_roles").select("user_id,role"),
       supabase.from("profiles").select("id,user_id,prenom,nom"),
     ]);
-    const profIds = (roles || []).filter((r: any) => r.role === "professor").map((r: any) => r.user_id);
-    const profProfiles = (profiles || []).filter((p: any) => profIds.includes(p.user_id));
+    const profIds = (roles || []).filter((r) => r.role === "professor").map((r) => r.user_id);
+    const profProfiles = (profiles || []).filter((p) => profIds.includes(p.user_id));
     setProfs(profProfiles);
     setSubjects(subs || []);
     setLoading(false);
@@ -33,10 +36,10 @@ export default function AdminSubjects() {
 
   useEffect(() => { load(); }, []);
 
-  const set = (k: string, v: any) => setForm((f: any) => ({ ...f, [k]: v }));
+  const set = <K extends keyof SubjectForm>(k: K, v: SubjectForm[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const openAdd = () => { setForm(empty); setModal("add"); };
-  const openEdit = (s: any) => {
+  const openEdit = (s: Tables<"subjects">) => {
     setForm({ nom: s.nom, code: s.code, coefficient: s.coefficient, semestre: s.semestre, filiere: s.filiere, professor_id: s.professor_id || "" });
     setEditId(s.id);
     setModal("edit");
@@ -133,7 +136,7 @@ export default function AdminSubjects() {
               </div>
               <div>
                 <label className="block text-xs uppercase tracking-wider font-semibold mb-1">Semestre</label>
-                <select value={form.semestre} onChange={(e) => set("semestre", e.target.value)} className="w-full px-3 py-2 rounded-xl border-2 border-foreground bg-background focus:outline-none text-sm">
+                <select value={form.semestre} onChange={(e) => set("semestre", e.target.value as Enums<"semester">)} className="w-full px-3 py-2 rounded-xl border-2 border-foreground bg-background focus:outline-none text-sm">
                   {SEMESTRES.map((s) => <option key={s}>{s}</option>)}
                 </select>
               </div>
