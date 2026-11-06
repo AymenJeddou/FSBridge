@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Enums, Tables } from "@/integrations/supabase/types";
 import { Loader2, Plus, Trash2, X, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { errorMessage } from "@/lib/utils";
 
 const FILIERES = ["GL", "RT", "IASIG", "MISI", "BI"];
 const SEMESTRES = ["S1", "S2", "S3", "S4", "S5", "S6"];
@@ -47,21 +48,25 @@ export default function AdminSubjects() {
 
   const save = async () => {
     if (!form.nom || !form.code) { toast({ title: "Erreur", description: "Nom et code sont requis.", variant: "destructive" }); return; }
-    setSaving(true);
-    const payload = { ...form, coefficient: Number(form.coefficient), professor_id: form.professor_id || null };
-    if (modal === "add") {
-      await supabase.from("subjects").insert(payload);
-    } else {
-      await supabase.from("subjects").update(payload).eq("id", editId);
+    const coefficient = Number(form.coefficient);
+    if (!Number.isFinite(coefficient) || coefficient < 1 || coefficient > 10) {
+      toast({ title: "Erreur", description: "Le coefficient doit être entre 1 et 10.", variant: "destructive" }); return;
     }
+    setSaving(true);
+    const payload = { ...form, coefficient, professor_id: form.professor_id || null };
+    const { error } = modal === "add"
+      ? await supabase.from("subjects").insert(payload)
+      : await supabase.from("subjects").update(payload).eq("id", editId);
+    setSaving(false);
+    if (error) { toast({ title: "Erreur", description: errorMessage(error), variant: "destructive" }); return; }
     toast({ title: modal === "add" ? "Matière ajoutée" : "Matière mise à jour" });
     setModal(null);
-    setSaving(false);
     load();
   };
 
   const del = async (id: string) => {
-    await supabase.from("subjects").delete().eq("id", id);
+    const { error } = await supabase.from("subjects").delete().eq("id", id);
+    if (error) { toast({ title: "Erreur", description: errorMessage(error), variant: "destructive" }); return; }
     toast({ title: "Matière supprimée" });
     load();
   };
