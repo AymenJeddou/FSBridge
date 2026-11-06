@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { errorMessage } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { Loader2, UserPlus, CheckCircle, Search, ChevronDown, Pencil, Trash2, X, Users, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -19,12 +20,14 @@ const emptyForm = {
   bureau: "" 
 };
 
+type Account = Tables<"profiles"> & { role: "admin" | "professor" | "student"; roles: string[] };
+
 export default function AdminAccounts() {
   const { toast } = useToast();
   const [view, setView] = useState<"list" | "form">("list");
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState(emptyForm);
-  const [accounts, setAccounts] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -47,7 +50,7 @@ export default function AdminAccounts() {
         rolesMap[r.user_id].push(r.role);
       });
 
-      const mapped = (allProfiles || []).map((p) => {
+      const mapped = (allProfiles || []).map((p): Account => {
         const roles = rolesMap[p.user_id] || [];
         const primaryRole = roles.includes("admin") 
           ? "admin" 
@@ -75,7 +78,7 @@ export default function AdminAccounts() {
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
-  const handleEdit = (acc: any) => {
+  const handleEdit = (acc: Account) => {
     setForm({
       user_id: acc.user_id,
       email: acc.email || "",
